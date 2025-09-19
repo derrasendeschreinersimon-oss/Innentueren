@@ -38,6 +38,7 @@
 
     .hint{ padding:8px 16px 14px; color:var(--muted); font-size:13px; }
     .hint code{ background:rgba(255,255,255,.08); padding:2px 6px; border-radius:6px; }
+    .warn{ color:#ffbaba; }
 
     /* SLIDE (neue "Folie") */
     .slide{ position:fixed; inset:0; z-index:50; display:grid; grid-template-rows: 1fr auto; background: #0a0f25; transform: translateY(100%); transition: transform .4s ease; }
@@ -103,7 +104,7 @@
         <button id="deleteBtn" type="button">Löschen</button>
       </div>
 
-      <div class="admin-only flex" id="zoomGroup" title="Zoom für Folie" style="margin-left:auto; align-items:center; gap:8px;">
+      <div class="admin-only flex" id="zoomGroup" title="Zoom für Folie" style="align-items:center; gap:8px;">
         <span>Zoom</span>
         <input id="zoomSlider" type="range" min="1" max="5" step="0.1" value="2">
         <output id="zoomOut">2.0×</output>
@@ -114,10 +115,19 @@
         <input id="assetsBase" type="text" value="assets/areas" placeholder="assets/areas" />
         <button id="saveAssetsBase" type="button">Speichern</button>
       </div>
+
+      <!-- NEW: zentrale Daten → Export / Import / Server laden -->
+      <div class="admin-only flex" id="dataGroup" style="align-items:center; gap:8px;">
+        <button id="serverLoadBtn" type="button" title="hotspots.json vom Server laden">Vom Server laden</button>
+        <button id="exportBtn" type="button" title="Hotspots als JSON exportieren">Hotspots exportieren</button>
+        <label class="inline" title="Hotspots aus JSON importieren"><input type="file" id="importFile" accept="application/json" />Hotspots importieren</label>
+        <span id="activeSetInfo" style="margin-left:auto; opacity:.8;"></span>
+      </div>
     </div>
 
+    <div id="storageWarn" class="hint warn" style="display:none"></div>
     <div class="hint">
-      <strong>Hinweis:</strong> Pro Bereich optionales Hintergrundbild in <code>assets/areas/&lt;slug&gt;/bg.webp|png|jpg</code>. Inhalte bleiben im Code (per Name verknüpft). Labels sind standardmäßig aus.
+      <strong>Hinweis:</strong> Pro Bereich optionales Hintergrundbild in <code>assets/areas/&lt;slug&gt;/bg.webp|png|jpg</code>. Inhalte bleiben im Code (per Name verknüpft). Labels sind standardmäßig aus. Zentrale Hotspots: <code>data/hotspots.json</code> (oder <code>hotspots-<em>set</em>.json</code> via <code>?set=…</code>).
     </div>
   </div>
 
@@ -149,6 +159,10 @@
         .replace(/-+/g,'-');
     }
     function clamp(v, min, max){ return Math.min(max, Math.max(min, v)); }
+    function canUseLocalStorage(){
+      try{ const k='__t'; localStorage.setItem(k,'1'); localStorage.removeItem(k); return true; }catch{ return false; }
+    }
+    function qs(name){ const u=new URL(location.href); return u.searchParams.get(name); }
 
     // ===== Inhalte (nur im Code) =====
     const contents = {
@@ -206,6 +220,11 @@
     let assetsBase = loadAssetsBase();
     assetsBaseInput.value = assetsBase;
 
+    // Zentrale Daten (Server/Repo)
+    const setParam = qs('set');
+    const activeSetName = setParam ? slugify(setParam) : 'default';
+    const centralPath = activeSetName === 'default' ? 'data/hotspots.json' : `data/hotspots-${activeSetName}.json`;
+
     // DOM Refs
     const overlay = document.getElementById('overlay');
     const measureGroup = document.getElementById('measureGroup');
@@ -236,6 +255,13 @@
     // Header/Admin
     const adminBtn = document.getElementById('adminBtn');
     const adminBadge = document.getElementById('adminBadge');
+
+    // Data UI
+    const serverLoadBtn = document.getElementById('serverLoadBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const importFile = document.getElementById('importFile');
+    const activeSetInfo = document.getElementById('activeSetInfo');
+    activeSetInfo.textContent = `Aktives Set: ${activeSetName} (${centralPath})`;
 
     // Zoom UI
     const zoomSlider = document.getElementById('zoomSlider');
@@ -562,7 +588,7 @@
     function ensureEditCatcher(){
       const exists = editLayer && editLayer.querySelector('rect[data-catcher="1"]');
       if(exists) return;
-      const r = document.createElementNS('http://www.w3.org/200/svg','rect');
+      const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
       r.setAttribute('x','0'); r.setAttribute('y','0'); r.setAttribute('width','100'); r.setAttribute('height','100');
       r.setAttribute('fill','transparent'); r.style.pointerEvents = 'all'; r.setAttribute('data-catcher','1');
       r.addEventListener('click', (ev)=>{
@@ -604,7 +630,7 @@
       overlay.style.pointerEvents = (measureMode || editing) ? 'auto' : 'none';
     }
 
-    // ===== Persistenz =====
+    // ===== Persistenz (local) =====
     function loadHotspots(){
       try{ const raw = localStorage.getItem(LS_KEYS.hotspots); return raw ? JSON.parse(raw) : []; }catch{ return []; }
     }
@@ -621,10 +647,75 @@
     function loadAssetsBase(){ return localStorage.getItem(LS_KEYS.assets) || 'assets/areas'; }
     function saveAssetsBase(base){ try{ localStorage.setItem(LS_KEYS.assets, base); }catch{} }
 
-    // Initial UI-Zustand anwenden
-    applyAdminUI();
-    refreshHotspotSelect();
-    renderHotspots();
+    // ===== Zentrale Daten (Server) =====
+    async function fetchCentralHotspots(showAlerts=true){
+      try{
+        const url = `${centralPath}?v=${Date.now()}`; // Cache-Bust
+        const res = await fetch(url, { cache: 'no-cache' });
+        if(!res.ok){ if(showAlerts) alert('Konnte zentrale Datei nicht laden: '+centralPath); return; }
+        const json = await res.json();
+        if(!Array.isArray(json.hotspots)) { if(showAlerts) alert('Ungültige Datei: Feld "hotspots" fehlt.'); return; }
+        hotspots = json.hotspots;
+        saveHotspots();
+        if(typeof json.zoom === 'number'){ zoom = json.zoom; saveZoom(); if(zoomSlider){ zoomSlider.value = String(zoom); zoomOut.textContent = `${zoom.toFixed(1)}×`; } }
+        refreshHotspotSelect();
+        renderHotspots();
+        if(showAlerts) alert('Hotspots vom Server geladen.');
+      }catch(err){
+        if(showAlerts) alert('Fehler beim Laden der zentralen Hotspots.');
+        console.error(err);
+      }
+    }
+
+    function exportHotspots(){
+      const payload = { version:1, updated:new Date().toISOString(), zoom, hotspots };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      const ts = new Date().toISOString().replace(/[:.]/g,'-');
+      a.download = `hotspots-${activeSetName}-${ts}.json`;
+      document.body.appendChild(a); a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+    }
+
+    function handleImportFile(file){
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        try{
+          const json = JSON.parse(reader.result);
+          if(!Array.isArray(json.hotspots)) { alert('Ungültige Datei: "hotspots" fehlt.'); return; }
+          hotspots = json.hotspots;
+          saveHotspots();
+          if(typeof json.zoom === 'number'){ zoom = json.zoom; saveZoom(); if(zoomSlider){ zoomSlider.value = String(zoom); zoomOut.textContent = `${zoom.toFixed(1)}×`; } }
+          refreshHotspotSelect();
+          renderHotspots();
+          alert('Hotspots importiert.');
+        }catch(e){ alert('Konnte Datei nicht lesen.'); }
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+
+    // ===== Events für zentrale Daten =====
+    serverLoadBtn.addEventListener('click', ()=> fetchCentralHotspots(true));
+    exportBtn.addEventListener('click', ()=> exportHotspots());
+    importFile.addEventListener('change', (e)=>{ const f = e.target.files?.[0]; if(f) handleImportFile(f); e.target.value=''; });
+
+    // ===== Init =====
+    (function init(){
+      applyAdminUI();
+      refreshHotspotSelect();
+      renderHotspots();
+
+      // Sichtbare Warnung, wenn localStorage nicht verfügbar (Privatmodus etc.)
+      if(!canUseLocalStorage()){
+        const w = document.getElementById('storageWarn');
+        w.textContent = 'Achtung: Lokaler Speicher ist deaktiviert (Privatmodus/In‑App‑Browser). Änderungen werden nicht dauerhaft gespeichert. Nutze "Hotspots exportieren"/"Vom Server laden".';
+        w.style.display = 'block';
+      }
+
+      // Automatisch vom Server laden, wenn lokal noch nichts vorhanden
+      if(!hotspots || hotspots.length === 0){ fetchCentralHotspots(false); }
+    })();
   </script>
 </body>
 </html>
