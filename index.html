@@ -23,12 +23,28 @@
     .overlay{ position:absolute; inset:0; pointer-events:none; z-index:1; }
     .hotspot{ cursor:pointer; }
     .label{ font-size:11px; fill:#fff; paint-order:stroke; stroke:rgba(0,0,0,.45); stroke-width:3px; font-weight:700; }
-    .poly-fill{ fill: rgba(122,162,255,.18); pointer-events:auto; stroke: var(--accent); stroke-width:.8; filter: drop-shadow(0 2px 6px var(--ring)); }
+    .poly-fill{ fill: rgba(122,162,255,.18); pointer-events:all; stroke: var(--accent); stroke-width:.8; filter: drop-shadow(0 2px 6px var(--ring)); }
 
     .toolbar{ position:relative; z-index:3; display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:10px 16px; border-top:1px solid rgba(255,255,255,.06); background:rgba(15,19,48,0.9); }
     .toolbar button, .toolbar label, .toolbar select, .toolbar input[type="text"]{ background:#18224a; color:#fff; border:1px solid rgba(255,255,255,.16); border-radius:12px; padding:8px 12px; cursor:pointer; }
     .toolbar select{ padding-right:28px; }
     .toolbar input[type="file"]{ display:none; }
+
+    /* USER-MODUS: Hotspots unsichtbar, aber klickbar */
+    body:not(.is-admin) .poly-fill{
+      fill: transparent !important;
+      fill-opacity: 0 !important;
+      stroke: transparent !important;
+      stroke-opacity: 0 !important;
+      stroke-width: 0 !important;
+      filter: none !important;
+      -webkit-filter: none !important;
+      pointer-events: auto !important; /* Klickbar lassen */
+    }
+    body:not(.is-admin) .label{ display:none !important; }
+    /* Sicherheitsnetz für temporäre Edit-/Mess-Ebenen */
+    body:not(.is-admin) #editLayer,
+    body:not(.is-admin) #measureLayer{ display:none !important; }
 
     /* Sichtbarkeit per Admin */
     .admin-only.inline{ display:none !important; }
@@ -116,7 +132,7 @@
         <button id="saveAssetsBase" type="button">Speichern</button>
       </div>
 
-      <!-- NEW: zentrale Daten → Export / Import / Server laden -->
+      <!-- Zentrale Daten → Export / Import / Server laden -->
       <div class="admin-only flex" id="dataGroup" style="align-items:center; gap:8px;">
         <button id="serverLoadBtn" type="button" title="hotspots.json vom Server laden">Vom Server laden</button>
         <button id="exportBtn" type="button" title="Hotspots als JSON exportieren">Hotspots exportieren</button>
@@ -135,6 +151,7 @@
   <section class="slide" id="slide" aria-live="polite" aria-modal="true" role="dialog">
     <div class="slide-actions">
       <button id="backBtn" aria-label="Zurück">← Zurück</button>
+      <button id="nextBgBtn" aria-label="Nächstes Bild" title="Nächstes Bild">▶ Weiter</button>
     </div>
     <div class="slide-bg">
       <img id="slideImg" alt="Bereichsbild" />
@@ -251,6 +268,7 @@
     const slideDesc = document.getElementById('slideDesc');
     const slideMeta = document.getElementById('slideMeta');
     const backBtn = document.getElementById('backBtn');
+    const nextBgBtn = document.getElementById('nextBgBtn');
 
     // Header/Admin
     const adminBtn = document.getElementById('adminBtn');
@@ -324,7 +342,7 @@
           poly.addEventListener('dblclick', (e)=>{ if(isAdmin){ e.preventDefault(); setSelectedIndex(i); enterEditMode(); }});
           g.appendChild(poly);
 
-          if(labelsOn){
+          if(isAdmin && labelsOn){
             const cx = h.points.reduce((a,p)=>a+p.x,0)/h.points.length;
             const cy = h.points.reduce((a,p)=>a+p.y,0)/h.points.length - 1.2;
             const label = document.createElementNS('http://www.w3.org/2000/svg','text');
@@ -368,6 +386,30 @@
       return [ `${assetsBase}/${slug}/bg.webp`, `${assetsBase}/${slug}/bg.png`, `${assetsBase}/${slug}/bg.jpg` ];
     }
 
+    // ===== Galerie-Logik für mehrere Hintergrundbilder =====
+    const gallery = { slug:null, index:1, cache:new Map(), hasAny:false };
+    function bgUrlFor(slug, i, ext){ const n = i<=1 ? '' : String(i); return `${assetsBase}/${slug}/bg${n}.${ext}`; }
+    function findBg(slug, i){
+      return new Promise(resolve=>{
+        const urls = ['webp','png','jpg'].map(ext=>bgUrlFor(slug,i,ext));
+        tryLoadImageSequential(urls, url=>resolve(url), ()=>resolve(null));
+      });
+    }
+    async function showIndex(i){
+      if(!gallery.slug) return false;
+      let url = gallery.cache.get(i);
+      if(!url){ url = await findBg(gallery.slug, i); if(url) gallery.cache.set(i, url); }
+      if(url){
+        slideImg.src = url;
+        slideImg.style.transform = 'none';
+        slideMeta.textContent = `Bild ${i}`;
+        gallery.index = i;
+        return true;
+      }
+      return false;
+    }
+    function setNavVisible(v){ nextBgBtn.style.display = v ? 'inline-block' : 'none'; }
+
     // ===== Neue Folie (Slide) =====
     function openSlide(h){
       const id = slugify(h.id||'');
@@ -377,12 +419,19 @@
       slideTitle.textContent = c?.title || h.id || id;
       slideDesc.innerHTML = c?.html || `<p>Für den Bereich <strong>${h.id}</strong> ist noch kein Inhalt hinterlegt.</p>`;
 
+      // Reset Galerie-Status
+      gallery.slug = null; gallery.index = 1; gallery.cache = new Map(); gallery.hasAny = false; setNavVisible(false);
+
       // Hintergrund: erst bereichsspezifisch, sonst gezoomtes Hausbild
-      tryLoadImageSequential(backgroundCandidates(id), (url)=>{
-        slideImg.src = url; // eigenes Bild nur im Bildbereich
+      tryLoadImageSequential(backgroundCandidates(id), async (url)=>{
+        // eigenes Bild nur im Bildbereich
+        slideImg.src = url; 
         slideImg.style.transform = 'none';
-        slideMeta.textContent = 'eigener Hintergrund';
+        slideMeta.textContent = 'Bild 1';
         slide.classList.add('open');
+
+        // Galerie aktivieren
+        gallery.slug = id; gallery.index = 1; gallery.cache.set(1, url); gallery.hasAny = true; setNavVisible(true);
       }, ()=>{
         // Fallback auf Hausbild + Zoom
         const baseSrc = document.getElementById('baseImage').src;
@@ -397,6 +446,9 @@
         slideImg.style.transform = `translate(-${tx}%, -${ty}%) scale(${s})`;
         slideMeta.textContent = `Zoom ${s.toFixed(1)}×`;
         slide.classList.add('open');
+
+        // Keine Galerie verfügbar
+        setNavVisible(false);
       });
 
       // Klasse für bereichsspezifische Styles
@@ -408,6 +460,14 @@
       slide.classList.remove('open');
       slideImg.style.transform = 'none';
     }
+
+    // Nächstes Bild in der Galerie
+    nextBgBtn.addEventListener('click', async ()=>{
+      if(!gallery.hasAny) return;
+      const next = gallery.index + 1;
+      // Bei Erfolg weiter, sonst zurück zu 1 (falls nur ein Bild existiert)
+      if(!(await showIndex(next))){ await showIndex(1); }
+    });
 
     // ===== Toolbar =====
     document.getElementById('toggleLabels').addEventListener('click', ()=>{
@@ -627,7 +687,8 @@
     }
 
     function applyPointerEvents(){
-      overlay.style.pointerEvents = (measureMode || editing) ? 'auto' : 'none';
+      // Hotspots sollen immer anklickbar sein – auch ohne Admin.
+      overlay.style.pointerEvents = 'auto';
     }
 
     // ===== Persistenz (local) =====
@@ -715,6 +776,9 @@
 
       // Automatisch vom Server laden, wenn lokal noch nichts vorhanden
       if(!hotspots || hotspots.length === 0){ fetchCentralHotspots(false); }
+
+      // Galerie-Button initial verstecken
+      setNavVisible(false);
     })();
   </script>
 </body>
