@@ -52,6 +52,10 @@
     .admin-only.flex{ display:none !important; }
     body.is-admin .admin-only.flex{ display:flex !important; }
 
+    /* Wenn Modal offen ist, App darunter ausblenden (sicher & barriereärmer) */
+    body.modal-open .app{ display:none !important; }
+
+
     .hint{ padding:8px 16px 14px; color:var(--muted); font-size:13px; }
     .hint code{ background:rgba(255,255,255,.08); padding:2px 6px; border-radius:6px; }
     .warn{ color:#ffbaba; }
@@ -71,6 +75,110 @@
       .slide{ grid-template-columns: 1.2fr .8fr; grid-template-rows: 1fr; }
       .slide-content{ border-top-left-radius:0; height:100%; max-height:none; border-left:1px solid rgba(255,255,255,.06); }
     }
+    .next-btn {
+  position: absolute;
+  top: 80%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(24, 74, 26, 0);
+  border: 2px solid rgba(255, 255, 255, 0);
+  border-radius: 50%;
+  padding: 16px;
+  cursor: pointer;
+  font-size: 50px; /* für Emoji */
+  color: #fff;
+}
+/* Lightbox */
+.lightbox{
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(10,15,37,.98);
+  display: grid;
+  grid-template-areas: "prev img next" "meta meta meta";
+  grid-template-columns: 80px 1fr 80px;
+  grid-template-rows: 1fr auto;
+  align-items: center; justify-items: center;
+}
+.lb-img{
+  grid-area: img;
+  max-width: 100vw; max-height: 80vh;
+  width: auto; height: auto;
+  object-fit: contain;
+  box-shadow: var(--shadow);
+}
+.lb-meta{
+  grid-area: meta;
+  color: var(--muted);
+  padding: 8px 16px 16px;
+  text-align: center;
+}
+.lb-close{
+  position: absolute; top: 10px; right: 10px;
+  background:#18224a; color:#fff; border:1px solid rgba(255,255,255,.2);
+  border-radius:12px; padding:8px 12px; cursor:pointer;
+}
+.lb-nav{
+  background: rgba(24,34,74,.8);
+  border: 1px solid rgba(255,255,255,.25);
+  color:#fff; border-radius:12px; cursor:pointer;
+  width: 48px; height: 48px; display:flex; align-items:center; justify-content:center;
+  font-size: 28px;
+  user-select: none;
+}
+.lb-prev{ grid-area: prev; }
+.lb-next{ grid-area: next; }
+
+/* Mobile */
+@media (max-width: 640px){
+  .lightbox{ grid-template-columns: 56px 1fr 56px; }
+  .lb-img{ max-height: 70vh; }
+  .lb-nav{ width:42px; height:42px; font-size:24px; }
+}
+/* Rollen-Modal */
+.role-modal{
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgb(13, 37, 10);
+  display: grid; place-items: center;
+}
+.role-card{
+  width: min(520px, 92vw);
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:16px; padding:20px; box-shadow: var(--shadow);
+  text-align:center;
+}
+.role-card h2{ margin:0 0 8px; }
+.role-card p{ color:var(--muted); margin:0 0 16px; }
+.role-actions{ display:flex; gap:12px; justify-content:center; }
+.role-btn{
+  background:#18224a; color:#fff; border:1px solid rgba(255,255,255,.2);
+  border-radius:12px; padding:10px 16px; cursor:pointer; font-size:16px;
+}
+
+/* Admin-Button komplett verstecken (wir starten nur noch über den Dialog) */
+.header .right{ display:none !important; }
+
+/* Sichtbarer Hotspot-Button (z. B. für 'Keller') */
+.hotspot-btn{
+  position:absolute;
+  transform: translate(-50%, -50%);
+  background: transparent; /* kein Hintergrund */
+  border: none;            /* keine Umrandung */
+  padding: 0;              /* kein Padding */
+  color: #fff;             /* Icon-Farbe (currentColor) */
+  cursor: pointer;
+  line-height: 1;
+  z-index: 2;
+}
+
+/* Größe des SVG-Icons */
+.hotspot-btn svg{
+  width: 80px;
+  height: 80px;
+  display: block;
+}
+
+.hotspot-btn:hover{ filter: brightness(1.05); }
+
   </style>
 </head>
 <body>
@@ -83,6 +191,8 @@
           <small>Bereiche werden (nur im Admin) angelegt/bearbeitet. Inhalte im Code; Hintergrund pro Bereich aus Datei.</small>
         </div>
         <span class="badge" id="adminBadge">Admin aktiv</span>
+        <button id="exitAdminBtn" class="admin-btn admin-only inline" title="Admin-Modus verlassen">Rolle wechseln</button>
+
       </div>
       <div class="right">
         <button id="adminBtn" class="admin-btn" aria-pressed="false" title="Admin ein/aus">🔒 Admin</button>
@@ -150,18 +260,42 @@
   <!-- Neue FOLIE -->
   <section class="slide" id="slide" aria-live="polite" aria-modal="true" role="dialog">
     <div class="slide-actions">
-      <button id="backBtn" aria-label="Zurück">← Zurück</button>
-      <button id="nextBgBtn" aria-label="Nächstes Bild" title="Nächstes Bild">▶ Weiter</button>
+      <button id="backBtn" aria-label="Zurück" style="font-size: 28px;">🏠</button>
+     
     </div>
     <div class="slide-bg">
       <img id="slideImg" alt="Bereichsbild" />
+      <button id="nextBgBtn" class="next-btn" aria-label="Nächstes Bild" title="Nächstes Bild">📸</button>
     </div>
+
     <article class="slide-content">
       <div class="meta" id="slideMeta"></div>
       <h2 id="slideTitle">Titel</h2>
       <div id="slideDesc">Beschreibung</div>
     </article>
   </section>
+  <!-- Rollen-Dialog -->
+  <div id="roleModal" class="role-modal" aria-modal="true" role="dialog">
+    <div class="role-card" role="document" aria-labelledby="roleTitle">
+      <h2 id="roleTitle">Willkommen beim Projekt</h2>
+      <p>Bitte wähle eine Rolle aus.</p>
+      <div class="role-actions">
+      <button id="roleStudent" class="role-btn">Schüler</button>
+      <button id="roleTeacher" class="role-btn">Lehrer</button>
+      </div>
+    </div>
+  </div>
+
+<!-- Lightbox / Slideshow -->
+<div id="lightbox" class="lightbox" aria-live="polite" aria-modal="true" role="dialog" style="display:none">
+  <button class="lb-close" id="lbClose" aria-label="Schließen">✕</button>
+
+  <button class="lb-nav lb-prev" id="lbPrev" aria-label="Vorheriges Bild">‹</button>
+  <img id="lbImg" class="lb-img" alt="Slideshow Bild" />
+  <button class="lb-nav lb-next" id="lbNext" aria-label="Nächstes Bild">›</button>
+
+  <div class="lb-meta" id="lbMeta"></div>
+</div>
 
   <script>
     // ===== Utils =====
@@ -176,6 +310,92 @@
         .replace(/-+/g,'-');
     }
     function clamp(v, min, max){ return Math.min(max, Math.max(min, v)); }
+    // Flächengewichteter Schwerpunkt für ein Polygon (x/y in Prozent)
+    function polyCentroid(pts){
+      let a = 0, cx = 0, cy = 0;
+      const n = pts.length;
+      if(n < 3) return { x: pts[0]?.x || 50, y: pts[0]?.y || 50 };
+      for(let i=0; i<n; i++){
+        const p = pts[i], q = pts[(i+1)%n];
+        const cross = p.x*q.y - q.x*p.y;
+        a += cross;
+        cx += (p.x + q.x) * cross;
+        cy += (p.y + q.y) * cross;
+      }
+      a = a * 0.5;
+      if(Math.abs(a) < 1e-7){
+        // degeneriert -> fallback: einfacher Mittelwert
+        const mx = pts.reduce((s,p)=>s+p.x,0)/n;
+        const my = pts.reduce((s,p)=>s+p.y,0)/n;
+        return { x: mx, y: my };
+      }
+      cx = cx / (6*a);
+      cy = cy / (6*a);
+      return { x: cx, y: cy };
+    }
+    // Punkt-in-Polygon (Raycasting)
+function pointInPolygon(pt, pts){
+  let inside = false;
+  for(let i=0, j=pts.length-1; i<pts.length; j=i++){
+    const xi = pts[i].x, yi = pts[i].y;
+    const xj = pts[j].x, yj = pts[j].y;
+    const intersect = ((yi > pt.y) !== (yj > pt.y)) &&
+      (pt.x < ( (xj - xi) * (pt.y - yi) / (yj - yi) + xi ));
+    if(intersect) inside = !inside;
+  }
+  return inside;
+}
+
+// Abstand Punkt–Segment (für "max Abstand zu Kanten")
+function distPointToSegSq(p, a, b){
+  let x = a.x, y = a.y;
+  let dx = b.x - a.x, dy = b.y - a.y;
+  if(dx !== 0 || dy !== 0){
+    const t = ((p.x - x)*dx + (p.y - y)*dy) / (dx*dx + dy*dy);
+    if(t > 1){ x = b.x; y = b.y; }
+    else if(t > 0){ x += dx*t; y += dy*t; }
+  }
+  const ddx = p.x - x, ddy = p.y - y;
+  return ddx*ddx + ddy*ddy;
+}
+
+// "Sicherer" Punkt im Polygon: Schwerpunkt, sonst grobe Gitter-Suche im BBox
+function insidePointFor(pts){
+  // 1) Versuch: Flächen-Schwerpunkt
+  let c = polyCentroid(pts);
+  if(pointInPolygon(c, pts)) return c;
+
+  // 2) Fallback: Gitter-Suche im Bounding-Box, wähle Punkt mit max. Kanten-Abstand
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for(const p of pts){ if(p.x<minX) minX=p.x; if(p.x>maxX) maxX=p.x; if(p.y<minY) minY=p.y; if(p.y>maxY) maxY=p.y; }
+  const steps = 24; // 24x24 = 576 Checks -> schnell genug
+  let best = null, bestD2 = -1;
+  for(let iy=0; iy<=steps; iy++){
+    for(let ix=0; ix<=steps; ix++){
+      const x = minX + (maxX - minX) * (ix/steps);
+      const y = minY + (maxY - minY) * (iy/steps);
+      const pt = {x,y};
+      if(!pointInPolygon(pt, pts)) continue;
+      // min. Abstand zu allen Kanten berechnen
+      let minD2 = Infinity;
+      for(let i=0, j=pts.length-1; i<pts.length; j=i++){
+        const d2 = distPointToSegSq(pt, pts[j], pts[i]);
+        if(d2 < minD2) minD2 = d2;
+      }
+      if(minD2 > bestD2){ bestD2 = minD2; best = pt; }
+    }
+  }
+  // 3) Falls nichts gefunden (extrem schmal): nimm einfach den Vertex-Mittelwert
+  if(!best){
+    const x = pts.reduce((s,p)=>s+p.x,0)/pts.length;
+    const y = pts.reduce((s,p)=>s+p.y,0)/pts.length;
+    best = {x,y};
+  }
+  // Begrenzen auf [0..100], nur zur Sicherheit
+  return { x: clamp(best.x, 0, 100), y: clamp(best.y, 0, 100) };
+}
+
+
     function canUseLocalStorage(){
       try{ const k='__t'; localStorage.setItem(k,'1'); localStorage.removeItem(k); return true; }catch{ return false; }
     }
@@ -184,49 +404,75 @@
     // ===== Inhalte (nur im Code) =====
     const contents = {
       eg: {
-        title: 'Erdgeschoss',
+        title: 'Ergeschoss',
         html: `
-          <h3>Projektbeschreibung</h3>
+          <h3>Informationen</h3>
           <ul>
-            <li>Hier soll eine Lernsituation eingetragen werden.</li>
+            <li><strong>Projektbeschreibung:</strong> Penis.</li>
+            <li><strong>Eindeckung:</strong> Tonziegel oder Betondachsteine.</li>
+            <li><strong>Wärmeschutz:</strong> U‑Wert optimieren; Wärmebrücken minimieren.</li>
+            <li><strong>Aufbau:</strong> Deckung → Lattung/Konterlattung → Unterspannbahn → Dämmung → Dampfbremse → Innenbekleidung.</li>
           </ul>
           <h3>Arbeitsaufträge</h3>
           <ol>
-            <li>Hier stehen Arbeitsaufträge</li>
-       
+            <li>Schichtenaufbau skizzieren und Funktionen beschriften.</li>
+            <li>Zwei Dämmstoffe vergleichen (λ‑Wert, Montage, Nachhaltigkeit) und Empfehlung formulieren.</li>
+            <li>Ziegelanzahl für 40 m² berechnen (14 Stk/m², +5 % Verschnitt).</li>
           </ol>
         `
-      }, 
-        og: {
-          title: '1. Obergeschoss',
-          html: `
-          <h3>Projektbeschreibung</h3>
+      },
+            og: {
+        title: '1. Obergeschoss',
+        html: `
+          <h3>Informationen</h3>
           <ul>
-              <li>Hier soll eine Lernsituation eingetragen werden.</li>
-
+            <li><strong>Projektbeschreibung:</strong> Penis.</li>
+            <li><strong>Eindeckung:</strong> Tonziegel oder Betondachsteine.</li>
+            <li><strong>Wärmeschutz:</strong> U‑Wert optimieren; Wärmebrücken minimieren.</li>
+            <li><strong>Aufbau:</strong> Deckung → Lattung/Konterlattung → Unterspannbahn → Dämmung → Dampfbremse → Innenbekleidung.</li>
           </ul>
           <h3>Arbeitsaufträge</h3>
           <ol>
-            <li>Hier stehen Arbeitsaufträge</li>
-
+            <li>Schichtenaufbau skizzieren und Funktionen beschriften.</li>
+            <li>Zwei Dämmstoffe vergleichen (λ‑Wert, Montage, Nachhaltigkeit) und Empfehlung formulieren.</li>
+            <li>Ziegelanzahl für 40 m² berechnen (14 Stk/m², +5 % Verschnitt).</li>
           </ol>
         `
-      }, 
-pool: {
+      },
+            pool: {
         title: 'Poolhaus - Sauna',
         html: `
           <h3>Informationen</h3>
           <ul>
-                        <li>Hier soll eine Lernsituation eingetragen werden.</li>
-
+            <li><strong>Projektbeschreibung:</strong> "Penis".</li>
+            <li><strong>Eindeckung:</strong> Tonziegel oder Betondachsteine.</li>
+            <li><strong>Wärmeschutz:</strong> U‑Wert optimieren; Wärmebrücken minimieren.</li>
+            <li><strong>Aufbau:</strong> Deckung → Lattung/Konterlattung → Unterspannbahn → Dämmung → Dampfbremse → Innenbekleidung.</li>
           </ul>
           <h3>Arbeitsaufträge</h3>
           <ol>
-            <li>Hier stehen Arbeitsaufträge</li>
-        
+            <li>Schichtenaufbau skizzieren und Funktionen beschriften.</li>
+            <li>Zwei Dämmstoffe vergleichen (λ‑Wert, Montage, Nachhaltigkeit) und Empfehlung formulieren.</li>
+            <li>Ziegelanzahl für 40 m² berechnen (14 Stk/m², +5 % Verschnitt).</li>
           </ol>
         `
-      } 
+      },
+      keller: {
+      title: 'Keller',
+          html: `
+            <h3>Informationen</h3>
+            <ul>
+              <li><strong>Bereich:</strong> Keller / Untergeschoss.</li>
+              <li><strong>Hinweis:</strong> Feuchteschutz, Lüftung, Fluchtwege beachten.</li>
+            </ul>
+            <h3>Aufgaben</h3>
+            <ol>
+              <li>Skizziere den Zugang (Treppenlauf, Tür, Podest).</li>
+              <li>Beurteile Bodenaufbau bzgl. Feuchte.</li>
+            </ol>
+          `
+      }
+      
       // weitere Bereiche hier ergänzen: fenster: {...}, tuer: {...}, fassade: {...}
     };
 
@@ -235,6 +481,7 @@ pool: {
 
     // ===== Hotspots – initial aus localStorage =====
     let hotspots = loadHotspots();
+
 
     // Labels standardmäßig AUS
     let labelsOn = false;
@@ -256,6 +503,9 @@ pool: {
 
     // Globale Zoom-Kennzahl (über Slider änderbar)
     let zoom = loadZoom();
+
+    const END_EXT = 'png'; // falls deine Dateien .png sind -> 'png'
+    let lastAreaSlug = null; // zuletzt geöffneter Bereich
 
     // Assets
     const assetsBaseInput = document.getElementById('assetsBase');
@@ -300,6 +550,9 @@ pool: {
     const adminBtn = document.getElementById('adminBtn');
     const adminBadge = document.getElementById('adminBadge');
 
+    //Admin Exit
+    const exitAdminBtn = document.getElementById('exitAdminBtn'); // NEU
+
     // Data UI
     const serverLoadBtn = document.getElementById('serverLoadBtn');
     const exportBtn = document.getElementById('exportBtn');
@@ -339,6 +592,24 @@ pool: {
         alert('Falsche PIN.');
       }
     });
+
+    // ===== Admin verlassen / Rolle wechseln =====
+    if (exitAdminBtn) {
+      exitAdminBtn.addEventListener('click', async ()=>{
+     // Admin deaktivieren
+       isAdmin = false;
+        sessionStorage.setItem('is_admin','false');
+        applyAdminUI();
+
+        // Optional: Schüler-Stand sofort laden
+        // await fetchCentralHotspots(true);
+
+        // Rollen-Dialog erneut öffnen (falls gewünscht)
+        if (typeof openRoleModal === 'function') {
+          openRoleModal();
+       }
+      });
+} 
 
     function applyAdminUI(){
       document.body.classList.toggle('is-admin', isAdmin);
@@ -391,7 +662,101 @@ pool: {
       }
 
       if(editing){ drawEditOverlay(); }
+                        // --- Sichtbarer Button für 'Keller' (Treppen-Emoji) ---
+                  // Vorher alte Buttons entfernen (falls re-render):
+                  document.querySelectorAll('.wrap .hotspot-btn').forEach(el => el.remove());
 
+                  const wrapEl = document.querySelector('.wrap');
+                  const kellerIndex = hotspots.findIndex(h => slugify(h.id) === 'keller' && h.shape === 'polygon');
+
+                  if (wrapEl && kellerIndex >= 0) {
+                    const h = hotspots[kellerIndex];
+                    if (Array.isArray(h.points) && h.points.length) {
+                      // Schwerpunkt berechnen (einfacher Mittelwert)
+                     const { x: cx, y: cy } = insidePointFor(h.points);
+
+
+                      // Button erstellen und positionieren (in % relativ zur .wrap)
+                      const btn = document.createElement('button');
+                      btn.className = 'hotspot-btn';
+                      btn.type = 'button';
+                      btn.setAttribute('aria-label', 'Keller öffnen');
+                      btn.title = 'Keller';
+                      btn.innerHTML = `
+                         <svg
+   version="1.1"
+   id="svg2"
+   width="299.97754"
+   height="265.98761"
+   viewBox="0 0 299.97754 265.98761"
+   sodipodi:docname="Screenshot 2025-09-20 135033.png"
+   inkscape:export-filename="Screenshot 2025-09-20 135033.svg"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs6">
+    <inkscape:path-effect
+       effect="fill_between_many"
+       method="originald"
+       linkedpaths="#path170,0,1"
+       id="path-effect343"
+       is_visible="true"
+       lpeversion="0"
+       join="true"
+       close="true"
+       autoreverse="true" />
+  </defs>
+  <sodipodi:namedview
+     id="namedview4"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false" />
+  <g
+     inkscape:groupmode="layer"
+     inkscape:label="Image"
+     id="g8"
+     transform="translate(-10.365887,-31)">
+    <path
+       style="fill:#C5CBD2; stroke:#111; stroke-width:2;"
+       inkscape:original-d="M 0,0"
+       inkscape:path-effect="#path-effect343"
+       d="M 135.44305,292.73751 C 120.60862,284.93543 106.95134,276.58308 91.60894,265.93001 83.236428,260.11651 72.193945,252.7668 67.070089,249.59731 61.946233,246.42782 53.64684,240.81726 48.626994,237.1294 43.607147,233.44154 34.775,227.40139 29,223.70684 23.225,220.0123 17.035985,215.75435 15.246633,214.24474 L 11.993267,211.5 10.952014,186.58033 c -0.84194,-20.14962 -0.793441,-25.15394 0.253366,-26.14357 2.166022,-2.04773 17.50218,-8.43085 32.29462,-13.44147 l 14,-4.7422 -0.5,-7.37655 c -0.275,-4.0571 -0.5,-12.7338 -0.5,-19.28155 V 103.68997 L 69,98.355203 c 6.875,-2.934123 17.9,-7.251866 24.5,-9.594986 l 12,-4.260217 1,-18.442363 1,-18.442364 5.5,-2.247442 C 121.84655,41.7529 168.77318,31 175.7025,31 c 1.86256,0 6.17895,0.655149 9.59198,1.455886 8.35224,1.959531 20.38995,4.342404 30.70552,6.078179 4.675,0.786651 10.525,1.883056 13,2.436457 2.475,0.553401 9.675,1.941756 16,3.085234 20.15517,3.643794 37.26166,6.998678 45.5,8.923351 4.4,1.027946 10.1007,2.150225 12.66823,2.493953 2.56753,0.343729 5.10444,1.165407 5.63759,1.825951 0.78127,0.967959 2.01359,136.279349 1.34641,147.838329 -0.12867,2.2292 -1.58373,3.44789 -9.40223,7.87483 -5.0875,2.88061 -15.325,8.93867 -22.75,13.46236 -15.46499,9.42206 -37.52977,21.30144 -85.5,46.03205 -9.35,4.82031 -21.5,11.3417 -27,14.49199 -10.27919,5.8877 -18.89691,10.01097 -20.87712,9.98894 -0.61758,-0.007 -4.74851,-1.91937 -9.17983,-4.25 z"
+       id="path345"
+       class="UnoptimicedTransforms" />
+    <path
+       style="fill:#000000; stroke:#111; stroke-width:2;"
+       d="M 135.44305,292.73751 C 120.60862,284.93543 106.95134,276.58308 91.60894,265.93001 83.236428,260.11651 72.193945,252.7668 67.070089,249.59731 61.946233,246.42782 53.64684,240.81726 48.626994,237.1294 43.607147,233.44154 34.775,227.40139 29,223.70684 23.225,220.0123 17.035985,215.75435 15.246633,214.24474 L 11.993267,211.5 10.952014,186.58033 c -0.84194,-20.14962 -0.793441,-25.15394 0.253366,-26.14357 2.166022,-2.04773 17.50218,-8.43085 32.29462,-13.44147 l 14,-4.7422 -0.5,-7.37655 c -0.275,-4.0571 -0.5,-12.7338 -0.5,-19.28155 V 103.68997 L 69,98.355203 c 6.875,-2.934123 17.9,-7.251866 24.5,-9.594986 l 12,-4.260217 1,-18.442363 1,-18.442364 5.5,-2.247442 C 121.84655,41.7529 168.77318,31 175.7025,31 c 1.86256,0 6.17895,0.655149 9.59198,1.455886 8.35224,1.959531 20.38995,4.342404 30.70552,6.078179 4.675,0.786651 10.525,1.883056 13,2.436457 2.475,0.553401 9.675,1.941756 16,3.085234 20.15517,3.643794 37.26166,6.998678 45.5,8.923351 4.4,1.027946 10.1007,2.150225 12.66823,2.493953 2.56753,0.343729 5.10444,1.165407 5.63759,1.825951 0.78127,0.967959 2.01359,136.279349 1.34641,147.838329 -0.12867,2.2292 -1.58373,3.44789 -9.40223,7.87483 -5.0875,2.88061 -15.325,8.93867 -22.75,13.46236 -15.46499,9.42206 -37.52977,21.30144 -85.5,46.03205 -9.35,4.82031 -21.5,11.3417 -27,14.49199 -10.27919,5.8877 -18.89691,10.01097 -20.87712,9.98894 -0.61758,-0.007 -4.74851,-1.91937 -9.17983,-4.25 z M 142.9054,272.25 c -0.052,-10.3125 -0.61454,-25.49794 -1.25,-33.74542 l -1.1554,-14.99541 -5.00647,-2.50459 c -2.75356,-1.37752 -9.95356,-4.71114 -16,-7.40805 -6.04644,-2.69691 -12.64915,-5.94493 -14.67269,-7.21782 -6.080106,-3.82466 -60.789047,-31.00855 -68.32084,-33.9474 -3.85,-1.50224 -10.132476,-4.21886 -13.961058,-6.03694 -3.828582,-1.81807 -7.136855,-3.12979 -7.351717,-2.91493 -0.214863,0.21486 0.105113,9.41972 0.711058,20.45525 C 16.504227,194.97021 17,205.27711 17,206.83891 c 0,2.55977 1.437982,3.76713 14.590426,12.25036 8.024734,5.1759 21.412234,14.15051 29.75,19.94358 C 69.678192,244.82592 78.3,250.64795 80.5,251.9707 c 2.2,1.32275 9.625,6.08307 16.5,10.57849 6.875,4.49542 16.775,10.68387 22,13.7521 5.225,3.06823 12.425,7.59637 16,10.06252 3.575,2.46615 6.8375,4.51817 7.25,4.56005 0.4125,0.0419 0.70743,-8.36136 0.6554,-18.67386 z M 180,272.17437 c 16.225,-9.06987 33.87171,-18.86544 39.21492,-21.76793 5.3432,-2.90248 12.7682,-7.05305 16.5,-9.22347 3.73179,-2.17043 11.96008,-6.52982 18.28508,-9.68753 6.325,-3.15772 12.625,-6.5286 14,-7.49086 2.23961,-1.56733 26.91359,-15.1459 34.5,-18.98603 l 3,-1.51855 V 173 c 0,-16.775 -0.40887,-48.8375 -0.9086,-71.25 C 303.76486,64.680343 303.53167,61 302.00946,61 300.65575,61 277.39103,66.760486 249,74.125467 c -7.6902,1.994931 -7.30595,0.385876 -6.88092,28.814303 l 0.38092,25.47758 -2.5,1.28536 c -2.39856,1.2332 -9.02528,3.68215 -37.5,13.8584 -7.15,2.55526 -13.55655,5.0995 -14.23678,5.65388 -0.93033,0.7582 -1.20224,7.30217 -1.09739,26.41054 0.0767,13.97142 -0.0418,25.57094 -0.26322,25.77669 -0.22144,0.20576 -9.92849,5.13316 -21.57124,10.94977 -11.64274,5.81662 -21.38985,10.93362 -21.66025,11.37112 -0.27039,0.43751 0.13286,8.44129 0.8961,17.78618 0.76325,9.34489 1.39786,24.31904 1.41025,33.27589 l 0.0225,16.28519 2.25,-1.20265 c 1.2375,-0.66146 15.525,-8.62347 31.75,-17.69335 z M 157.81568,213.0963 c 8.32035,-4.34703 16.4906,-8.50688 18.15612,-9.24411 1.66551,-0.73723 3.0282,-1.63301 3.0282,-1.99062 0,-0.35762 -4.6125,-2.46408 -10.25,-4.68104 -5.6375,-2.21695 -16.55,-7.16535 -24.25,-10.99644 -7.7,-3.83108 -19.625,-9.44489 -26.5,-12.47512 -6.875,-3.03023 -18.575,-8.54264 -26,-12.24979 -7.425,-3.70715 -17.767496,-8.72466 -22.983325,-11.15002 l -9.483326,-4.40975 -9.516674,3.69238 c -9.656718,3.74671 -17.553982,6.71118 -26.420504,9.91769 -4.803876,1.73728 -4.854833,1.79903 -2.5,3.02922 1.322106,0.69069 6.615219,2.89992 11.762474,4.90941 9.802867,3.82705 26.445867,11.48867 36.641355,16.86789 9.155369,4.83044 71.91813,36.45308 72.59388,36.57598 0.32663,0.0594 7.40144,-3.44864 15.7218,-7.79568 z M 183,179.13957 c 0,-10.92323 0.2712,-21.83906 0.60267,-24.2574 l 0.60267,-4.39697 -13.35267,-4.37096 C 155.19535,140.98885 138.67006,135.31633 124,130.03143 c -5.775,-2.08044 -15.9,-5.70005 -22.5,-8.04358 -6.6,-2.34352 -17.742732,-6.4495 -24.761626,-9.1244 C 69.71948,110.18855 63.024466,108 61.860566,108 c -1.880375,0 -2.052453,0.41787 -1.544261,3.75 0.314556,2.0625 0.887464,10.20652 1.273128,18.09783 l 0.701206,14.34783 4.452414,1.90852 c 2.448827,1.04969 10.820933,5.00955 18.60468,8.79969 15.465337,7.53054 26.758297,12.77673 30.652267,14.23964 4.04664,1.52026 15.38611,6.84236 31.46458,14.76765 13.3099,6.56062 32.7124,14.95735 34.78542,15.05391 0.4125,0.0192 0.75,-8.90226 0.75,-19.8255 z M 211.17574,138 c 0.97401,0 23.99393,-9.00592 24.7953,-9.70048 0.92595,-0.80255 -2.38139,-2.12458 -10.8609,-4.34138 -4.73558,-1.23802 -15.58514,-4.58662 -24.11014,-7.44135 -17.6686,-5.9166 -3.22634,-1.94169 -85.74837,-25.59804 l -6.24837,-1.791202 -10.251629,3.363631 c -11.466429,3.762214 -29.669283,11.026471 -31.023393,12.380581 -0.899674,0.89968 2.995758,2.46548 33.271762,13.37389 30.6934,11.0588 41.44297,14.86204 62.48678,22.10811 l 20.98678,7.22643 12.89184,-4.7901 C 204.45591,140.15554 210.67057,138 211.17574,138 Z m 28.77337,-16.75 c -0.10877,-10.15177 -1.75184,-45.386063 -2.13431,-45.768537 -0.22214,-0.22214 -6.45885,-1.581601 -13.85935,-3.021025 C 216.55495,71.021015 207.35,68.986973 203.5,67.940345 c -5.9421,-1.615367 -29.81431,-5.964087 -69,-12.569498 -4.95,-0.834406 -12.2625,-2.08695 -16.25,-2.783431 L 111,51.321087 V 69.050993 86.7809 l 8.25,2.161891 c 4.5375,1.18904 9.375,2.59326 10.75,3.120488 1.375,0.527228 11.5,3.393523 22.5,6.369543 11,2.976018 25.85,7.290498 33,9.587728 7.15,2.29722 15.7,4.99049 19,5.98502 3.3,0.99454 12.3,4.05107 20,6.7923 7.7,2.74122 14.3375,5.03311 14.75,5.09308 0.4125,0.06 0.7271,-2.02845 0.69911,-4.64095 z M 274,62.968883 c 7.425,-1.804157 13.82922,-3.561938 14.23159,-3.906179 0.40238,-0.344241 -5.89762,-1.841149 -14,-3.326462 C 266.12922,54.250929 252.75,51.695159 244.5,50.056752 236.25,48.418345 222.525,45.707554 214,44.032771 205.475,42.357989 192.03674,39.660972 184.13719,38.0394 l -14.36281,-2.948312 -8.63719,1.978796 C 145.50791,40.650581 135.56732,43.103681 131,44.507023 c -2.475,0.760462 -6.4125,1.874824 -8.75,2.476361 C 117.50573,48.204284 116.5628,50 120.66598,50 c 1.46628,0 12.82878,1.801185 25.25,4.002633 12.42121,2.201448 27.98402,4.925056 34.58402,6.052463 6.6,1.127406 19.2,3.79605 28,5.930319 8.8,2.134269 19.375,4.475526 23.5,5.202794 7.34929,1.295735 7.71099,1.259396 18,-1.808367 5.775,-1.721871 16.575,-4.606802 24,-6.410959 z"
+       id="path170"
+       sodipodi:nodetypes="sssssscssscsscsscccsssssssssssssscssscsssssssssssssssssssssscssssscssssssssscssssssssssscssssssssscssssssscssssssssssscsssscsssssssscccsssssssssssssscssssssssss"
+       class="UnoptimicedTransforms" />
+  </g>
+</svg>
+
+`;
+
+                      btn.style.left = cx + '%';
+                      btn.style.top  = (cy + 30 ) + '%'; // optisch leicht nach oben versetzt
+
+                      // Klick öffnet die ganz normale Slide des Bereichs
+                      btn.addEventListener('click', (e)=>{
+                        e.stopPropagation();
+                        openSlide(h);
+                      });
+
+                      wrapEl.appendChild(btn);
+                    }
+                  }
+
+      
       applyPointerEvents();
       document.getElementById('toggleLabels')?.setAttribute('aria-pressed', String(labelsOn));
     }
@@ -439,6 +804,7 @@ pool: {
     // ===== Neue Folie (Slide) =====
     function openSlide(h){
       const id = slugify(h.id||'');
+      lastAreaSlug = id; // <- NEU: Bereich merken
 
       // Inhalte aus Code
       const c = contents[id];
@@ -483,17 +849,119 @@ pool: {
     }
 
     function closeSlide(){
-      slide.classList.remove('open');
+       // Slide schließen
+       slide.classList.remove('open');
       slideImg.style.transform = 'none';
-    }
 
-    // Nächstes Bild in der Galerie
-    nextBgBtn.addEventListener('click', async ()=>{
-      if(!gallery.hasAny) return;
-      const next = gallery.index + 1;
-      // Bei Erfolg weiter, sonst zurück zu 1 (falls nur ein Bild existiert)
-      if(!(await showIndex(next))){ await showIndex(1); }
+      }
+
+      // Vorherige Listener sicher entfernen & Lightbox öffnen
+    nextBgBtn.replaceWith(nextBgBtn.cloneNode(true));
+    const nextBgBtnNew = document.getElementById('nextBgBtn');
+    nextBgBtnNew.addEventListener('click', ()=> {
+      openLightbox(1);
     });
+
+// ===== Lightbox / Slideshow =====
+const lb = document.getElementById('lightbox');
+const lbImg = document.getElementById('lbImg');
+const lbPrev = document.getElementById('lbPrev');
+const lbNext = document.getElementById('lbNext');
+const lbClose = document.getElementById('lbClose');
+const lbMeta = document.getElementById('lbMeta');
+
+let lbIndex = 1;
+let lbCount = 0;
+let lbUrls = [];
+
+async function buildGalleryList(slug){
+  const urls = [];
+  let i = 1;
+  while(true){
+    const url = await findBg(slug, i);
+    if(!url) break;
+    urls.push(url);
+    i++;
+    if(i > 50) break;
+  }
+  return urls;
+}
+
+async function openLightbox(startIndex=1){
+  if(!gallery.slug){
+    const baseSrc = document.getElementById('baseImage').src;
+    lbUrls = [baseSrc];
+  } else {
+    lbUrls = await buildGalleryList(gallery.slug);
+    if(lbUrls.length === 0){
+      const baseSrc = document.getElementById('baseImage').src;
+      lbUrls = [baseSrc];
+    }
+  }
+  lbCount = lbUrls.length;
+  lbIndex = Math.min(Math.max(1, startIndex), lbCount);
+  showLightboxIndex(lbIndex);
+  lb.style.display = 'grid';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox(){
+  lb.style.display = 'none';
+  document.body.style.overflow = '';
+
+  // NEU: Endbild NUR in der Slide setzen
+  if (lastAreaSlug) {
+    slideImg.src = `${assetsBase}/${lastAreaSlug}/end.${END_EXT}`; // z.B. .webp
+    slideImg.style.transform = 'none';           // sicherheitshalber Zoom/Fallback aus
+    slideMeta.textContent = 'Abschlussbild';     // optionaler Hinweis in der Meta-Zeile
+  }
+}
+
+function showLightboxIndex(i){
+  lbImg.src = lbUrls[i-1];
+  lbMeta.textContent = `Bild ${i} / ${lbCount}`;
+  lbIndex = i;
+}
+
+function nextLightbox(){
+  const n = lbIndex + 1;
+  showLightboxIndex(n > lbCount ? 1 : n);
+}
+
+function prevLightbox(){
+  const p = lbIndex - 1;
+  showLightboxIndex(p < 1 ? lbCount : p);
+}
+
+// Buttons
+lbNext.addEventListener('click', nextLightbox);
+lbPrev.addEventListener('click', prevLightbox);
+lbClose.addEventListener('click', closeLightbox);
+
+// ESC & Pfeiltasten
+window.addEventListener('keydown', (e)=>{
+  if(lb.style.display === 'none') return;
+  if(e.key === 'Escape') closeLightbox();
+  else if(e.key === 'ArrowRight') nextLightbox();
+  else if(e.key === 'ArrowLeft') prevLightbox();
+});
+
+// Touch-Wischgesten
+let touchStartX = null;
+lb.addEventListener('touchstart', (e)=>{ touchStartX = e.touches[0].clientX; }, {passive:true});
+lb.addEventListener('touchend', (e)=>{
+  if(touchStartX == null) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  touchStartX = null;
+  const TH = 40;
+  if(dx < -TH) nextLightbox();
+  else if(dx > TH) prevLightbox();
+}, {passive:true});
+
+// Klick auf Hintergrund schließt
+lb.addEventListener('click', (e)=>{
+  if(e.target === lb) closeLightbox();
+});
 
     // ===== Toolbar =====
     document.getElementById('toggleLabels').addEventListener('click', ()=>{
@@ -792,6 +1260,9 @@ pool: {
       applyAdminUI();
       refreshHotspotSelect();
       renderHotspots();
+      setupRoleHandlers();
+      openRoleModal();
+
 
       // Sichtbare Warnung, wenn localStorage nicht verfügbar (Privatmodus etc.)
       if(!canUseLocalStorage()){
@@ -805,6 +1276,50 @@ pool: {
 
       // Galerie-Button initial verstecken
       setNavVisible(false);
+      // ===== Rollen-Dialog =====
+    function openRoleModal(){
+      const m = document.getElementById('roleModal');
+      if(m) m.style.display = 'grid';
+        document.body.classList.add('modal-open');          // NEU
+        document.querySelector('.app')?.setAttribute('aria-hidden','true');  // optional a11y
+}
+    function closeRoleModal(){
+     const m = document.getElementById('roleModal');
+      if(m) m.style.display = 'none';
+        document.body.classList.remove('modal-open');       // NEU
+        document.querySelector('.app')?.removeAttribute('aria-hidden');      // optional a11y
+}
+
+function setupRoleHandlers(){
+  const btnS = document.getElementById('roleStudent');
+  const btnT = document.getElementById('roleTeacher');
+  if(!btnS || !btnT) return;
+
+  btnS.addEventListener('click', async ()=>{
+    // Schüler: Admin aus, UI anwenden, vom Server laden
+    isAdmin = false;
+    sessionStorage.setItem('is_admin','false');
+    applyAdminUI();
+    await fetchCentralHotspots(true);   // immer Serverstand laden
+    closeRoleModal();
+  });
+
+  btnT.addEventListener('click', ()=>{
+    const pin = prompt('Admin-PIN eingeben:');
+    if(pin === ADMIN_PIN){
+      isAdmin = true;
+      sessionStorage.setItem('is_admin','true');
+      applyAdminUI();
+      // Optional: Als Lehrer NICHT automatisch Server laden, damit lokale Edits bleiben:
+      // Wenn du trotzdem sofort den Serverstand laden willst, hier entkommentieren:
+      // fetchCentralHotspots(true);
+      closeRoleModal();
+    } else if(pin !== null){
+      alert('Falsche PIN.');
+    }
+  });
+}
+
     })();
   </script>
 </body>
