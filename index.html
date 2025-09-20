@@ -252,6 +252,26 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
   .header{ padding: 10px 12px; }
   .toolbar{ padding: 8px 12px; }
 }
+/* Wenn die Slide den Contain-Modus bekommt, Bild vollständig einpassen */
+.slide--contain .slide-bg{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.slide--contain .slide-bg img{
+  width:100%;
+  height:100%;
+  object-fit: contain;      /* statt cover -> kein Beschnitt */
+  background:#0a0f25;       /* ruhiger Rand, falls Letterboxing */
+}
+
+/* Lightbox: auf Phones noch mehr Höhe erlauben + “safe” viewport */
+.lb-img{
+  max-width: 100vw;
+  max-height: 85svh;        /* statt 80vh -> stabiler auf Mobile */
+  width:auto; height:auto;
+  object-fit: contain;
+}
 
   </style>
 </head>
@@ -618,7 +638,7 @@ function insidePointFor(pts){
     const slideDesc = document.getElementById('slideDesc');
     const slideMeta = document.getElementById('slideMeta');
     const backBtn = document.getElementById('backBtn');
-    const nextBgBtn = document.getElementById('nextBgBtn');
+    let nextBgBtn = document.getElementById('nextBgBtn');
 
     // Header/Admin
     const adminBtn = document.getElementById('adminBtn');
@@ -894,7 +914,9 @@ function insidePointFor(pts){
         slideImg.src = url; 
         slideImg.style.transform = 'none';
         slideMeta.textContent = 'Bild 1';
-        slide.classList.add('open');
+        slide.classList.add('slide--contain');
+        slide.classList.add('open'); // NEU: Slide sichtbar machen
+
 
         // Galerie aktivieren
         gallery.slug = id; gallery.index = 1; gallery.cache.set(1, url); gallery.hasAny = true; setNavVisible(true);
@@ -912,6 +934,8 @@ function insidePointFor(pts){
         slideImg.style.transform = `translate(-${tx}%, -${ty}%) scale(${s})`;
         slideMeta.textContent = `Zoom ${s.toFixed(1)}×`;
         slide.classList.add('open');
+        slide.classList.remove('slide--contain');   // <--- NEU
+
 
         // Keine Galerie verfügbar
         setNavVisible(false);
@@ -931,10 +955,11 @@ function insidePointFor(pts){
 
       // Vorherige Listener sicher entfernen & Lightbox öffnen
     nextBgBtn.replaceWith(nextBgBtn.cloneNode(true));
-    const nextBgBtnNew = document.getElementById('nextBgBtn');
-    nextBgBtnNew.addEventListener('click', ()=> {
-      openLightbox(1);
-    });
+const nextBgBtnNew = document.getElementById('nextBgBtn');
+nextBgBtn = nextBgBtnNew;   // <<< NEU: Referenz aktualisieren!
+nextBgBtn.addEventListener('click', ()=> {
+  openLightbox(1);
+});
 
 // ===== Lightbox / Slideshow =====
 const lb = document.getElementById('lightbox');
