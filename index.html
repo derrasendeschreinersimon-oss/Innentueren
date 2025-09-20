@@ -664,6 +664,27 @@ html.no-scroll, body.no-scroll { overflow: hidden !important; }
   text-align: start;
   hyphens: manual;
 }
+/* === mobile: Info nicht von fixer Toolbar überdecken === */
+:root{
+  --tools-h: 60px;                    /* Default – wird per JS live gemessen */
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --tools-gap: 10px;                  /* kleiner Luftspalt über der Leiste */
+}
+
+/* Nur wenn Slide offen und NICHT im Video-Modus: unten Platz lassen */
+#slide.open:not(.video-mode) .slide-content,
+#slide.open:not(.video-mode) #slideDesc{
+  padding-bottom: calc(var(--tools-h) + var(--safe-bottom) + var(--tools-gap));
+  overflow: auto;                     /* falls noch nicht gesetzt */
+}
+
+/* Optional: kleinste Screens – etwas mehr Luft */
+@media (max-width: 480px){
+  #slide.open:not(.video-mode) .slide-content,
+  #slide.open:not(.video-mode) #slideDesc{
+    padding-bottom: calc(var(--tools-h) + var(--safe-bottom) + 16px);
+  }
+}
 
   </style>
 </head>
@@ -915,6 +936,32 @@ function insidePointFor(pts){
       if(minD2 > bestD2){ bestD2 = minD2; best = pt; }
     }
   }
+  // === Toolbar-Höhe messen und als CSS-Variable setzen ===
+function updateToolsHeight(){
+  const tools = document.querySelector('#slide .slide-tools');
+  if(!tools) return;
+  const h = Math.ceil(tools.getBoundingClientRect().height);
+  document.documentElement.style.setProperty('--tools-h', h + 'px');
+}
+
+// beim Laden + Fenster-/Viewport-Änderungen updaten
+window.addEventListener('load', updateToolsHeight);
+window.addEventListener('resize', updateToolsHeight);
+window.addEventListener('orientationchange', updateToolsHeight);
+if (window.visualViewport){
+  visualViewport.addEventListener('resize', updateToolsHeight);
+}
+
+// wenn sich #slide-Klassen ändern (z. B. open/video-mode), neu messen
+(new MutationObserver(updateToolsHeight)).observe(
+  document.getElementById('slide'),
+  { attributes: true, attributeFilter: ['class'] }
+);
+
+// OPTIONAL: nach dem Öffnen einer Slide/Wechsel der Inhalte manuell aufrufen
+// z.B. in deiner openArea(...) oder nachdem du #slideDesc befüllst:
+// updateToolsHeight();
+
   // 3) Falls nichts gefunden (extrem schmal): nimm einfach den Vertex-Mittelwert
   if(!best){
     const x = pts.reduce((s,p)=>s+p.x,0)/pts.length;
