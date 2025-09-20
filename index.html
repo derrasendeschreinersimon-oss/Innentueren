@@ -374,6 +374,50 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
     0 1px 2px rgba(0,0,0,0.15);
   transform: translateY(1px);
 }
+/* === Info-Karte im Arbeitsblatt-Stil === */
+.slide-content .info-card{
+  background: rgba(152, 251, 152, 0.25);   /* hellgrün, leicht transparent */
+  border: 1px solid #90c290;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 10px 0 14px;
+  display: grid;
+  grid-template-columns: 1fr auto;         /* Text links, Illustration rechts */
+  gap: 14px;
+}
+
+.slide-content .info-card header h2{
+  margin: 0 0 6px;
+  color: #eff4ef;
+  font-size: 1.1rem;
+}
+
+.slide-content .info-content p{
+  margin: .55em 0;
+  line-height: 1.45;
+}
+
+.slide-content .info-content .question{
+  margin-top: .9em;
+  font-weight: 700;
+  color: #eff4ef;
+}
+
+.slide-content .info-illustration img{
+  width: 110px;       /* Größe der Figur rechts */
+  height: auto;
+  display: block;
+}
+
+@media (max-width: 640px){
+  .slide-content .info-card{
+    grid-template-columns: 1fr;            /* Illustration unter den Text */
+    text-wrap: pretty;
+  }
+  .slide-content .info-illustration{
+    justify-self: end;
+  }
+}
 
   </style>
 </head>
@@ -383,8 +427,8 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
       <div style="display:flex; gap:12px; align-items:center;">
         <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.25 21v-6h3.5v6h5.25V12.5H21L12 3l-9 9.5h2.25V21z"/></svg>
         <div>
-          <h1>Haus erkunden</h1>
-          <small>Bereiche werden (nur im Admin) angelegt/bearbeitet. Inhalte im Code; Hintergrund pro Bereich aus Datei.</small>
+          <h1>Innenausbau Projekt - Stadtvilla Familie Müller</h1>
+          <small></small>
         </div>
         <span class="badge" id="adminBadge">Admin aktiv</span>
         <button id="exitAdminBtn" class="admin-btn admin-only inline" title="Admin-Modus verlassen">Rolle wechseln</button>
@@ -403,7 +447,7 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
     <div class="toolbar">
       <label class="admin-only inline"><input type="file" id="imgPicker" accept="image/*" />Eigenes Bild laden</label>
       <button id="toggleLabels" type="button" class="admin-only inline" aria-pressed="false">Labels an/aus</button>
-      <button id="shareLink" type="button">Teilen (URL kopieren)</button>
+      
 
       <button id="startMeasure" type="button" class="admin-only inline">Neuen Bereich aufnehmen</button>
       <div class="measure-group admin-only flex" id="measureGroup">
@@ -424,6 +468,7 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
         <button id="saveEditBtn" type="button" disabled>Änderungen speichern</button>
         <button id="cancelEditBtn" type="button" disabled>Abbrechen</button>
         <button id="deleteBtn" type="button">Löschen</button>
+        <button id="shareLink" type="button">Teilen (URL kopieren)</button>
       </div>
 
       <div class="admin-only flex" id="zoomGroup" title="Zoom für Folie" style="align-items:center; gap:8px;">
@@ -448,9 +493,7 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
     </div>
 
     <div id="storageWarn" class="hint warn" style="display:none"></div>
-    <div class="hint">
-      <strong>Hinweis:</strong> Pro Bereich optionales Hintergrundbild in <code>assets/areas/&lt;slug&gt;/bg.webp|png|jpg</code>. Inhalte bleiben im Code (per Name verknüpft). Labels sind standardmäßig aus. Zentrale Hotspots: <code>data/hotspots.json</code> (oder <code>hotspots-<em>set</em>.json</code> via <code>?set=…</code>).
-    </div>
+
   </div>
 
   <!-- Neue FOLIE -->
@@ -607,75 +650,147 @@ function insidePointFor(pts){
 
     // ===== Inhalte (nur im Code) =====
     const contents = {
-      eg: {
-        title: 'Ergeschoss',
-        html: `
-          <h3>Informationen</h3>
-          <ul>
-            <li><strong>Projektbeschreibung:</strong> Penis.</li>
-            <li><strong>Eindeckung:</strong> Tonziegel oder Betondachsteine.</li>
-            <li><strong>Wärmeschutz:</strong> U‑Wert optimieren; Wärmebrücken minimieren.</li>
-            <li><strong>Aufbau:</strong> Deckung → Lattung/Konterlattung → Unterspannbahn → Dämmung → Dampfbremse → Innenbekleidung.</li>
-          </ul>
-          <h3>Arbeitsaufträge</h3>
-          <ol>
-            <li>Schichtenaufbau skizzieren und Funktionen beschriften.</li>
-            <li>Zwei Dämmstoffe vergleichen (λ‑Wert, Montage, Nachhaltigkeit) und Empfehlung formulieren.</li>
-            <li>Ziegelanzahl für 40 m² berechnen (14 Stk/m², +5 % Verschnitt).</li>
-          </ol>
-        `
-      },
+              eg: {
+                title: 'Ergeschoss',
+                html: `
+                  <section class="info-card">
+                    <header>
+                      <h2>Situation 1 – Das Carport</h2>
+                    </header>
+
+                    <div class="info-content">
+                      <p>
+                        Bei der Begehung des Carports zeigt Familie Schillermann uns, dass insbesondere die
+                        unteren Enden der Holzstützen starke Schäden aufweisen (vgl. Abb.). Das Holz ist verfault,
+                        teilweise weich und bereits so stark geschädigt, dass die Stützen ihre Tragfähigkeit
+                        verlieren könnten.
+                      </p>
+                      <p>
+                        Der Bauherr hat sich im Vorfeld bereits im Internet informiert und dabei ein Video
+                        gefunden, in dem gezeigt wird, wie man den unteren Anschluss einer Holzstütze mit einem
+                        einfachen Stahlwinkel und einer Sockelverkleidung neu ausführen kann. Diese Lösung
+                        gefällt ihm optisch sehr, weshalb er uns bittet, sie genauso umzusetzen.
+                      </p>
+
+                      <h3 class="question">Nun stellt sich die Frage:</h3>
+                      <p>
+                        Reicht diese vorgestellte Ausführung wirklich aus, um die Stützen dauerhaft vor
+                        Feuchtigkeit und Fäulnis zu schützen – oder entstehen neue Schwachstellen?
+                      </p>
+                    </div>
+
+                    <aside class="info-illustration">
+                      <img src="assets/ui/handwerker.png" alt="Illustration: Handwerker">
+                    </aside>
+                  </section>
+                `
+              },
+
             og: {
-        title: '1. Obergeschoss',
-        html: `
-          <h3>Informationen</h3>
-          <ul>
-            <li><strong>Projektbeschreibung:</strong> Penis.</li>
-            <li><strong>Eindeckung:</strong> Tonziegel oder Betondachsteine.</li>
-            <li><strong>Wärmeschutz:</strong> U‑Wert optimieren; Wärmebrücken minimieren.</li>
-            <li><strong>Aufbau:</strong> Deckung → Lattung/Konterlattung → Unterspannbahn → Dämmung → Dampfbremse → Innenbekleidung.</li>
-          </ul>
-          <h3>Arbeitsaufträge</h3>
-          <ol>
-            <li>Schichtenaufbau skizzieren und Funktionen beschriften.</li>
-            <li>Zwei Dämmstoffe vergleichen (λ‑Wert, Montage, Nachhaltigkeit) und Empfehlung formulieren.</li>
-            <li>Ziegelanzahl für 40 m² berechnen (14 Stk/m², +5 % Verschnitt).</li>
-          </ol>
-        `
-      },
+                title: '1. Obergeschoss',
+                html: `
+                  <section class="info-card">
+                    <header>
+                      <h2>Situation 2 – Das Carport</h2>
+                    </header>
+
+                    <div class="info-content">
+                      <p>
+                        Bei der Begehung des Carports zeigt Familie Schillermann uns, dass insbesondere die
+                        unteren Enden der Holzstützen starke Schäden aufweisen (vgl. Abb.). Das Holz ist verfault,
+                        teilweise weich und bereits so stark geschädigt, dass die Stützen ihre Tragfähigkeit
+                        verlieren könnten.
+                      </p>
+                      <p>
+                        Der Bauherr hat sich im Vorfeld bereits im Internet informiert und dabei ein Video
+                        gefunden, in dem gezeigt wird, wie man den unteren Anschluss einer Holzstütze mit einem
+                        einfachen Stahlwinkel und einer Sockelverkleidung neu ausführen kann. Diese Lösung
+                        gefällt ihm optisch sehr, weshalb er uns bittet, sie genauso umzusetzen.
+                      </p>
+
+                      <h3 class="question">Nun stellt sich die Frage:</h3>
+                      <p>
+                        Reicht diese vorgestellte Ausführung wirklich aus, um die Stützen dauerhaft vor
+                        Feuchtigkeit und Fäulnis zu schützen – oder entstehen neue Schwachstellen?
+                      </p>
+                    </div>
+
+                    <aside class="info-illustration">
+                      <img src="assets/ui/handwerker.png" alt="Illustration: Handwerker">
+                    </aside>
+                  </section>
+                `
+              },
             pool: {
-        title: 'Poolhaus - Sauna',
-        html: `
-          <h3>Informationen</h3>
-          <ul>
-            <li><strong>Projektbeschreibung:</strong> "Penis".</li>
-            <li><strong>Eindeckung:</strong> Tonziegel oder Betondachsteine.</li>
-            <li><strong>Wärmeschutz:</strong> U‑Wert optimieren; Wärmebrücken minimieren.</li>
-            <li><strong>Aufbau:</strong> Deckung → Lattung/Konterlattung → Unterspannbahn → Dämmung → Dampfbremse → Innenbekleidung.</li>
-          </ul>
-          <h3>Arbeitsaufträge</h3>
-          <ol>
-            <li>Schichtenaufbau skizzieren und Funktionen beschriften.</li>
-            <li>Zwei Dämmstoffe vergleichen (λ‑Wert, Montage, Nachhaltigkeit) und Empfehlung formulieren.</li>
-            <li>Ziegelanzahl für 40 m² berechnen (14 Stk/m², +5 % Verschnitt).</li>
-          </ol>
-        `
-      },
+                title: 'Poolhaus - Saunaumbau',
+                html: `
+                  <section class="info-card">
+                    <header>
+                      <h2>Situation 2 – Das Carport</h2>
+                    </header>
+
+                    <div class="info-content">
+                      <p>
+                        Bei der Begehung des Carports zeigt Familie Schillermann uns, dass insbesondere die
+                        unteren Enden der Holzstützen starke Schäden aufweisen (vgl. Abb.). Das Holz ist verfault,
+                        teilweise weich und bereits so stark geschädigt, dass die Stützen ihre Tragfähigkeit
+                        verlieren könnten.
+                      </p>
+                      <p>
+                        Der Bauherr hat sich im Vorfeld bereits im Internet informiert und dabei ein Video
+                        gefunden, in dem gezeigt wird, wie man den unteren Anschluss einer Holzstütze mit einem
+                        einfachen Stahlwinkel und einer Sockelverkleidung neu ausführen kann. Diese Lösung
+                        gefällt ihm optisch sehr, weshalb er uns bittet, sie genauso umzusetzen.
+                      </p>
+
+                      <h3 class="question">Nun stellt sich die Frage:</h3>
+                      <p>
+                        Reicht diese vorgestellte Ausführung wirklich aus, um die Stützen dauerhaft vor
+                        Feuchtigkeit und Fäulnis zu schützen – oder entstehen neue Schwachstellen?
+                      </p>
+                    </div>
+
+                    <aside class="info-illustration">
+                      <img src="assets/ui/handwerker.png" alt="Illustration: Handwerker">
+                    </aside>
+                  </section>
+                `
+              },
       keller: {
-      title: 'Keller',
-          html: `
-            <h3>Informationen</h3>
-            <ul>
-              <li><strong>Bereich:</strong> Keller / Untergeschoss.</li>
-              <li><strong>Hinweis:</strong> Feuchteschutz, Lüftung, Fluchtwege beachten.</li>
-            </ul>
-            <h3>Aufgaben</h3>
-            <ol>
-              <li>Skizziere den Zugang (Treppenlauf, Tür, Podest).</li>
-              <li>Beurteile Bodenaufbau bzgl. Feuchte.</li>
-            </ol>
-          `
-      }
+                title: 'Keller - Montagesituation',
+                html: `
+                  <section class="info-card">
+                    <header>
+                      <h2>Situation 2 – Das Carport</h2>
+                    </header>
+
+                    <div class="info-content">
+                      <p>
+                        Bei der Begehung des Carports zeigt Familie Schillermann uns, dass insbesondere die
+                        unteren Enden der Holzstützen starke Schäden aufweisen (vgl. Abb.). Das Holz ist verfault,
+                        teilweise weich und bereits so stark geschädigt, dass die Stützen ihre Tragfähigkeit
+                        verlieren könnten.
+                      </p>
+                      <p>
+                        Der Bauherr hat sich im Vorfeld bereits im Internet informiert und dabei ein Video
+                        gefunden, in dem gezeigt wird, wie man den unteren Anschluss einer Holzstütze mit einem
+                        einfachen Stahlwinkel und einer Sockelverkleidung neu ausführen kann. Diese Lösung
+                        gefällt ihm optisch sehr, weshalb er uns bittet, sie genauso umzusetzen.
+                      </p>
+
+                      <h3 class="question">Nun stellt sich die Frage:</h3>
+                      <p>
+                        Reicht diese vorgestellte Ausführung wirklich aus, um die Stützen dauerhaft vor
+                        Feuchtigkeit und Fäulnis zu schützen – oder entstehen neue Schwachstellen?
+                      </p>
+                    </div>
+
+                    <aside class="info-illustration">
+                      <img src="assets/ui/handwerker.png" alt="Illustration: Handwerker">
+                    </aside>
+                  </section>
+                `
+              },
       
       // weitere Bereiche hier ergänzen: fenster: {...}, tuer: {...}, fassade: {...}
     };
