@@ -178,6 +178,80 @@
 }
 
 .hotspot-btn:hover{ filter: brightness(1.05); }
+/* ===== Responsive-Overlays & Typo ===== */
+html { font-size: clamp(14px, 1.6vw, 16px); }
+.header h1 { font-size: clamp(16px, 2.4vw, 20px); }
+.header small { font-size: clamp(11px, 1.5vw, 13px); }
+
+.app { max-width: min(100%, 1100px); }
+
+/* Bildfläche: volle Breite, Overlay bleibt deckungsgleich */
+.wrap { width: 100%; }
+.wrap img { width: 100%; height: auto; display: block; }
+
+/* Toolbar: bricht sauber um, größere Touch-Ziele */
+.toolbar { gap: 10px; }
+.toolbar button,
+.toolbar label,
+.toolbar select,
+.toolbar input[type="text"]{
+  font-size: clamp(12px, 1.8vw, 14px);
+  padding: clamp(8px, 1.6vw, 10px) clamp(10px, 2vw, 14px);
+  min-height: 40px; /* Touch-Ziel */
+}
+
+/* Slide: Content-Höhe auf Mobile angenehmer, ohne Scroll-Hölle */
+.slide { height: 100svh; } /* sicheres Viewport-Height auf iOS/Android */
+.slide-content { max-height: 45svh; }
+@media (max-width: 860px){
+  .slide-content { max-height: 50svh; }
+}
+
+/* Zurück-/Aktion-Buttons oben links: größere Trefferfläche */
+.slide-actions button{
+  min-width: 40px; min-height: 40px;
+  font-size: clamp(20px, 4.5vw, 28px);
+  padding: clamp(6px, 1.5vw, 8px) clamp(8px, 2vw, 12px);
+}
+
+/* Kamera-Button (Slideshow) zentriert & skaliert */
+.next-btn{
+  top: 78%;
+  font-size: clamp(28px, 8vw, 52px);
+  padding: 0;
+}
+
+/* Lightbox schon gut – auf sehr kleinen Screens noch kompakter */
+@media (max-width: 480px){
+  .lb-img{ max-height: 68svh; }
+  .lb-nav{ width: 38px; height: 38px; font-size: 22px; }
+}
+
+/* Rollen-Dialog: kompakter auf Phones */
+.role-card{
+  width: min(520px, 94vw);
+  padding: clamp(16px, 4vw, 22px);
+}
+.role-actions{ gap: clamp(8px, 2.5vw, 12px); }
+.role-btn{
+  font-size: clamp(14px, 2vw, 16px);
+  padding: clamp(8px, 2.2vw, 12px) clamp(12px, 3vw, 16px);
+}
+
+/* Sichtbarer Hotspot-Button (z.B. Keller): skaliert mit Viewport */
+.hotspot-btn svg{
+  width: clamp(28px, 7vw, 80px);
+  height: clamp(28px, 7vw, 80px);
+}
+
+/* Labels im Admin: skalieren */
+.label{ font-size: clamp(10px, 1.8vw, 12px); }
+
+/* Kleinere Screens: Header enger, Abstände leicht reduziert */
+@media (max-width: 600px){
+  .header{ padding: 10px 12px; }
+  .toolbar{ padding: 8px 12px; }
+}
 
   </style>
 </head>
