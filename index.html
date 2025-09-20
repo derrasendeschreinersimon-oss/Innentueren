@@ -4,7 +4,30 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Interaktive Lernsituation – Haus (Hotspots)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+
   <style>
+    :root{
+          /* Einfach hier austauschen = globale Schrift ändern */
+          --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", Arial, "Helvetica Neue", sans-serif;
+          --font-heading: "Merriweather", Georgia, "Times New Roman", serif;
+        }
+
+        /* Global (UI & Text) */
+        body{ font-family: var(--font-body); }
+
+        /* Überschriften (Infos/Panels) */
+        .slide-content .info-card header,
+        .slide-content .info-card header *{
+          font-family: var(--font-heading);
+        }
+
+        /* Nur Info-Text (falls du NUR dort ändern willst) */
+        .slide-content .info-card .info-content,
+        #slideDesc{ font-family: var(--font-body); }
+
     :root{ --bg:#0b1020; --panel:#11162a; --text:#eaf0ff; --muted:#a6b0cf; --accent:#7aa2ff; --ring: rgba(122,162,255,.35); --shadow: 0 10px 30px rgba(0,0,0,.35); }
     html,body{height:100%;}
     body{ margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu; color:var(--text); background: radial-gradient(1200px 600px at 10% -10%, #15204b 0%, transparent 50%), var(--bg); display:flex; align-items:center; justify-content:center; padding:16px; }
@@ -376,15 +399,24 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
 }
 /* === Info-Karte im Arbeitsblatt-Stil === */
 .slide-content .info-card{
-  background: rgba(152, 251, 152, 0.25);   /* hellgrün, leicht transparent */
+  background: rgba(152, 251, 152, 0.25);
   border: 1px solid #90c290;
   border-radius: 10px;
   padding: 14px 16px;
   margin: 10px 0 14px;
+
   display: grid;
   grid-template-columns: 1fr auto;         /* Text links, Illustration rechts */
+  grid-template-areas:
+    "header header"
+    "content illustration";                 /* genau: Bild neben Text, unter der Überschrift */
+  align-items: start;
   gap: 14px;
 }
+.slide-content .info-card header{ grid-area: header; }
+.slide-content .info-card .info-content{ grid-area: content; }
+.slide-content .info-card .info-illustration{ grid-area: illustration; align-self: start; }
+
 
 .slide-content .info-card header h2{
   margin: 0 0 6px;
@@ -411,12 +443,226 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
 
 @media (max-width: 640px){
   .slide-content .info-card{
-    grid-template-columns: 1fr;            /* Illustration unter den Text */
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "illustration"   /* Grafik direkt unter der Überschrift */
+      "content";       /* Text darunter */
     text-wrap: pretty;
   }
-  .slide-content .info-illustration{
-    justify-self: end;
-  }
+  .slide-content .info-illustration{ justify-self: end; }
+}
+
+/* === VIDEO / COMING SOON === */
+.video-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 16 / 9; /* responsive */
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.video-wrap iframe,
+.video-wrap video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.coming-soon {
+  display: grid;
+  place-items: center;
+  min-height: 220px;
+  padding: 24px;
+  border-radius: 12px;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255,255,255,.06) 0 12px,
+    rgba(255,255,255,.03) 12px 24px
+  );
+  color: var(--muted);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  box-shadow: var(--shadow);
+}
+.coming-soon span { opacity: .9; font-size: 18px; }
+/* === Start-Toolbar: Mini-Version der Slide-Werkzeugleiste === */
+.toolbar .slide-tools.slide-tools--mini {
+  position: static; /* kein Overlay */
+  inset: auto;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  margin: 0 0 8px 0; /* kleiner Abstand nach unten, wenn gewünscht */
+}
+.toolbar .slide-tools.slide-tools--mini .slide-tools-inner {
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+/* === Video/Coming Soon (falls nicht schon vorhanden) === */
+.video-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.video-wrap iframe,
+.video-wrap video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.coming-soon {
+  display: grid;
+  place-items: center;
+  min-height: 220px;
+  padding: 24px;
+  border-radius: 12px;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255,255,255,.06) 0 12px,
+    rgba(255,255,255,.03) 12px 24px
+  );
+  color: var(--muted);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  box-shadow: var(--shadow);
+}
+.coming-soon span { opacity: .9; font-size: 18px; }
+
+/* === Fullscreen-Video-Modus in der Slide (neu) === */
+#slide.video-mode {
+  position: fixed;            /* über alles legen */
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  display: grid;
+  grid-template-columns: 1fr !important; /* EIN Spalte */
+  grid-template-rows: 1fr !important;    /* EINE Zeile */
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden;           /* nichts herausragen lassen */
+  z-index: 9999;
+}
+
+/* alles außer Video ausblenden */
+#slide.video-mode #slideImg,
+#slide.video-mode .slide-header,
+#slide.video-mode #slideMeta,
+#slide.video-mode #nextBgBtn,
+#slide.video-mode .introBtn {  /* Video-Button selbst ausblenden */
+  display: none !important;
+}
+
+/* rechte Content-Spalte zum Vollflächen-Bereich machen */
+#slide.video-mode .slide-content,
+#slide.video-mode #slideDesc {
+  grid-column: 1 / -1 !important;
+  grid-row: 1 / -1 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: #000 !important;
+}
+
+/* das eigentliche Video auf die ganze Fläche legen */
+#slide.video-mode .video-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+#slide.video-mode .video-wrap iframe,
+#slide.video-mode .video-wrap video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+/* nur der Home-Button bleibt sichtbar – oben links "schwebend" */
+#slide.video-mode .slide-tools {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  right: auto;
+  bottom: auto;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+#slide.video-mode #backBtn {
+  backdrop-filter: blur(8px);
+  border-radius: 9999px;
+}
+
+
+/* Home-Button (Back) als einzige sichtbare Aktion, oben links „schwebend“ */
+#slide.video-mode .slide-tools {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  right: auto;
+  bottom: auto;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+#slide.video-mode #backBtn {
+  backdrop-filter: blur(8px);
+  border-radius: 9999px;
+}
+#slide.video-mode #backBtn .label {
+  /* Wenn du nur das Icon willst, Zeile aktivieren: */
+  /* display: none; */
+}
+html.no-scroll, body.no-scroll { overflow: hidden !important; }
+/* === Blocksatz für Infotexte === */
+.slide-content .info-card .info-content,
+#slideDesc .info-content {
+  text-align: justify;        /* Blocksatz */
+  text-align-last: left;      /* letzte Zeile linksbündig */
+  text-justify: inter-word;   /* bessere Wortabstände (unterstützte Browser) */
+  hyphens: auto;              /* automatische Silbentrennung */
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+}
+
+/* Falls dein Text direkt als <p>/<li> in #slideDesc steht: */
+#slideDesc p, 
+#slideDesc li {
+  text-align: justify;
+  text-align-last: left;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+}
+
+/* Überschriften/Labels NICHT im Blocksatz */
+.slide-content .info-card header,
+.slide-content .info-card header * {
+  text-align: start;
+  hyphens: manual;
 }
 
   </style>
@@ -445,6 +691,26 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
     </div>
 
     <div class="toolbar">
+
+              <label class="admin-only inline" style="display:inline-flex;gap:.5rem;align-items:center">
+          <span>Schriftart:</span>
+          <select id="fontSelect">
+            <option value="system">System</option>
+            <option value="inter" selected>Inter (Sans)</option>
+            <option value="merri">Merriweather (Serif)</option>
+          </select>
+        </label>
+
+                  <!-- Mini-Werkzeugleiste in der Start-Toolbar -->
+      <div class="slide-tools slide-tools--mini">
+        <div class="slide-tools-inner">
+          <button class="introBtn" type="button" title="Einstiegsvideo ansehen">
+            <span class="icon">🎬</span>
+            <span class="label">Video</span>
+          </button>
+        </div>
+      </div>
+
       <label class="admin-only inline"><input type="file" id="imgPicker" accept="image/*" />Eigenes Bild laden</label>
       <button id="toggleLabels" type="button" class="admin-only inline" aria-pressed="false">Labels an/aus</button>
       
@@ -511,6 +777,12 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
           <button id="nextBgBtn" aria-label="Bilder anzeigen" title="Bilder anzeigen">
             <span class="icon">📸</span> <span class="label">Bilder</span>
           </button>
+              <button class="introBtn" type="button" title="Video zum Bereich ansehen">
+        <span class="icon">🎬</span>
+        <span class="label">Video</span>
+        </button>
+
+
         </div>
       </div>
 
@@ -545,6 +817,17 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
 </div>
 
   <script>
+    //font
+    const fontMap = {
+        system: 'system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", Arial, "Helvetica Neue", sans-serif',
+        inter: '"Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", Arial, "Helvetica Neue", sans-serif',
+        merri: '"Merriweather", Georgia, "Times New Roman", serif',
+            };
+            document.getElementById('fontSelect')?.addEventListener('change', (e)=>{
+              const val = e.target.value;
+              document.documentElement.style.setProperty('--font-body', fontMap[val]);
+            });
+
     // ===== Utils =====
     const umlauts = { 'ä':'ae','ö':'oe','ü':'ue','ß':'ss' };
     function slugify(str){
@@ -651,31 +934,26 @@ function insidePointFor(pts){
     // ===== Inhalte (nur im Code) =====
     const contents = {
               eg: {
-                title: 'Ergeschoss',
+                title: 'Erdgeschoss',
                 html: `
                   <section class="info-card">
                     <header>
-                      <h2>Situation 1 – Das Carport</h2>
+                      <h2>Situation 1 – Der Schlafbereich</h2>
                     </header>
 
                     <div class="info-content">
                       <p>
-                        Bei der Begehung des Carports zeigt Familie Schillermann uns, dass insbesondere die
-                        unteren Enden der Holzstützen starke Schäden aufweisen (vgl. Abb.). Das Holz ist verfault,
-                        teilweise weich und bereits so stark geschädigt, dass die Stützen ihre Tragfähigkeit
-                        verlieren könnten.
+                        Im Erdgeschoss der Stadtvilla ist alles auf Ruhe und Rückzug abgestimmt: Schlafzimmer und ein sehr großzügiges Bad bilden eine eigene Einheit hinter einer durchgehenden Wand, getrennt vom übrigen Haus und doch hat jeder Raum seinen eigenen Zugang.
                       </p>
                       <p>
-                        Der Bauherr hat sich im Vorfeld bereits im Internet informiert und dabei ein Video
-                        gefunden, in dem gezeigt wird, wie man den unteren Anschluss einer Holzstütze mit einem
-                        einfachen Stahlwinkel und einer Sockelverkleidung neu ausführen kann. Diese Lösung
-                        gefällt ihm optisch sehr, weshalb er uns bittet, sie genauso umzusetzen.
+                        Weil es das einzige Bad im Haus ist, soll der Durchgang zwischen Schlaf- und Nassbereich je nach Situation offen oder geschlossen sein ohne eine feste neue Wand zu errichten. 	Familie Müller wünscht sich dafür eine kreative, variable Lösung, am besten eine Tür, die den Übergang elegant verschwinden lässt.
                       </p>
-
+                      <p>
+                       Die Innenseite der Trennwand soll eine hölzerne Wandverkleidung erhalten: warm, ruhig, wohnlich – ganz nach Herr Müllers Liebe zu Holz. In diese Verkleidung müssen alle Abschlüsse nahtlos integriert werden: die Tür zum Schlafzimmer, die Tür zum Bad und die variable Trennung dazwischen. Nichts soll hervorstehen; Fugenbild, Linien und Proportionen geben den Ton an. Auf der Flurseite bleibt die Wand ohne Verkleidung – klar und zurückhaltend. 
+                        </p>
                       <h3 class="question">Nun stellt sich die Frage:</h3>
                       <p>
-                        Reicht diese vorgestellte Ausführung wirklich aus, um die Stützen dauerhaft vor
-                        Feuchtigkeit und Fäulnis zu schützen – oder entstehen neue Schwachstellen?
+                        Wie gehen wir am besten vor, um unser Ziel zu erreichen?
                       </p>
                     </div>
 
@@ -691,27 +969,22 @@ function insidePointFor(pts){
                 html: `
                   <section class="info-card">
                     <header>
-                      <h2>Situation 2 – Das Carport</h2>
+                      <h2>Situation 2 – Die Bibliothek </h2>
                     </header>
 
                     <div class="info-content">
                       <p>
-                        Bei der Begehung des Carports zeigt Familie Schillermann uns, dass insbesondere die
-                        unteren Enden der Holzstützen starke Schäden aufweisen (vgl. Abb.). Das Holz ist verfault,
-                        teilweise weich und bereits so stark geschädigt, dass die Stützen ihre Tragfähigkeit
-                        verlieren könnten.
+                       Oben, auf der Empore mit Blick in den Wohnraum, fällt das Nachmittagslicht auf eine lange, noch leere Außenwand. Genau hier wünschen sich die Müllers ihre kleine Bibliothek ein ruhiger Ort zwischen Arbeitszimmer und Galerie.
                       </p>
                       <p>
-                        Der Bauherr hat sich im Vorfeld bereits im Internet informiert und dabei ein Video
-                        gefunden, in dem gezeigt wird, wie man den unteren Anschluss einer Holzstütze mit einem
-                        einfachen Stahlwinkel und einer Sockelverkleidung neu ausführen kann. Diese Lösung
-                        gefällt ihm optisch sehr, weshalb er uns bittet, sie genauso umzusetzen.
+                        Beim Aufmaß zeigt sich der Patzer: Für das Arbeitszimmer wurden versehentlich zwei Türöffnungen hergestellt. Die Lösung soll beides vereinen: Die Emporen-Außenwand wird zu einem durchgehenden Bücherregal, das den Raum ordnet und Gewicht bekommt. Der falsch erstellte Durchgang wird von der Arbeitszimmerseite mit einem Regal geschlossen als funktionale Einbautiefe nach innen. Der korrekte Zugang bleibt bestehen, die Tür wird unsichtbar in das Regalsystem integriert: Linien laufen weiter, Fugen greifen durch, Griffe verschwinden im Raster.
                       </p>
-
+                      <p>
+                      Die Inspiration liefert wieder das Haus Rühlstraße klar, ruhig, präzise. Material und Design liegen zunächst bei uns: warmes Holz oder hell und fein? Offene Fächer, integrierte Zargen, verdeckte Bänder alles so, dass Türblatt und Regal als eine Fläche wirken. Bevor es losgeht, sichern wir die Varianten mit den Bauherren ab. 
+                      </p>
                       <h3 class="question">Nun stellt sich die Frage:</h3>
                       <p>
-                        Reicht diese vorgestellte Ausführung wirklich aus, um die Stützen dauerhaft vor
-                        Feuchtigkeit und Fäulnis zu schützen – oder entstehen neue Schwachstellen?
+                        Wie gehen wir am besten vor, um unser Ziel zu erreichen?
                       </p>
                     </div>
 
@@ -722,31 +995,26 @@ function insidePointFor(pts){
                 `
               },
             pool: {
-                title: 'Poolhaus - Saunaumbau',
+                title: 'Poolhaus',
                 html: `
                   <section class="info-card">
                     <header>
-                      <h2>Situation 2 – Das Carport</h2>
+                      <h2>Situation 3 – Der Saunaumbau </h2>
                     </header>
 
                     <div class="info-content">
                       <p>
-                        Bei der Begehung des Carports zeigt Familie Schillermann uns, dass insbesondere die
-                        unteren Enden der Holzstützen starke Schäden aufweisen (vgl. Abb.). Das Holz ist verfault,
-                        teilweise weich und bereits so stark geschädigt, dass die Stützen ihre Tragfähigkeit
-                        verlieren könnten.
+                        Am Rand des Gartens liegt das Poolhaus: bisher ein nüchterner Funktionsraum mit Dusche, WC und Regalen fürs Zubehör. Jetzt soll daraus ein echter Rückzugsort werden. Vor allem Frau Müller wünscht sich eine Sauna, die den Wellnessbereich komplettiert. 
                       </p>
                       <p>
-                        Der Bauherr hat sich im Vorfeld bereits im Internet informiert und dabei ein Video
-                        gefunden, in dem gezeigt wird, wie man den unteren Anschluss einer Holzstütze mit einem
-                        einfachen Stahlwinkel und einer Sockelverkleidung neu ausführen kann. Diese Lösung
-                        gefällt ihm optisch sehr, weshalb er uns bittet, sie genauso umzusetzen.
+                        Unser Auftrag: Den Raum durch eine Trennwand so teilen, dass der rechte Gebäudeteil zur Sauna umgebaut werden kann; der separate Außenzugang ist bereits vorhanden und bleibt in Nutzung. Über der künftigen Sauna soll die Decke zusätzlich um ca. 20 cm abgehängt werden, um Platz für die Lüftungsanlage (Zuluft/Abluft, Revisionsmöglichkeit) zu schaffen. Der gesamte Saunabereich wird energetisch gedämmt, dabei sind sowohl die neu zu errichtende Trennwand als auch die Außenwände zu berücksichtigen. 	
                       </p>
-
-                      <h3 class="question">Nun stellt sich die Frage:</h3>
                       <p>
-                        Reicht diese vorgestellte Ausführung wirklich aus, um die Stützen dauerhaft vor
-                        Feuchtigkeit und Fäulnis zu schützen – oder entstehen neue Schwachstellen?
+                        Gewünscht ist eine klassische Sauna mit vollflächiger Holzverkleidung rundum. Das Design soll ruhig, hochwertig und stimmig zum Haus gestaltet werden. Die Decke ist dem entsprechend passend auszuführen. Materialwahl und Design liegen bei uns; wir bereiten Varianten vor und klären die Auswahl vor Ausführung mit den Bauherren.  
+                      </p>
+                        <h3 class="question">Nun stellt sich die Frage:</h3>
+                      <p>
+                        Wie gehen wir am besten vor um unser Ziel zu erreichen?
                       </p>
                     </div>
 
@@ -757,31 +1025,26 @@ function insidePointFor(pts){
                 `
               },
       keller: {
-                title: 'Keller - Montagesituation',
+                title: 'Keller',
                 html: `
                   <section class="info-card">
                     <header>
-                      <h2>Situation 2 – Das Carport</h2>
+                      <h2>Situation 4 – Türmontage im Kellerraum</h2>
                     </header>
 
                     <div class="info-content">
                       <p>
-                        Bei der Begehung des Carports zeigt Familie Schillermann uns, dass insbesondere die
-                        unteren Enden der Holzstützen starke Schäden aufweisen (vgl. Abb.). Das Holz ist verfault,
-                        teilweise weich und bereits so stark geschädigt, dass die Stützen ihre Tragfähigkeit
-                        verlieren könnten.
+                        Oben, auf der Empore mit Blick in den Wohnraum, fällt das Nachmittagslicht auf eine lange, noch leere Außenwand. Genau hier wünschen sich die Müllers ihre kleine Bibliothek ein ruhiger Ort zwischen Arbeitszimmer und Galerie.
                       </p>
                       <p>
-                        Der Bauherr hat sich im Vorfeld bereits im Internet informiert und dabei ein Video
-                        gefunden, in dem gezeigt wird, wie man den unteren Anschluss einer Holzstütze mit einem
-                        einfachen Stahlwinkel und einer Sockelverkleidung neu ausführen kann. Diese Lösung
-                        gefällt ihm optisch sehr, weshalb er uns bittet, sie genauso umzusetzen.
+                        Beim Aufmaß zeigt sich der Patzer: Für das Arbeitszimmer wurden versehentlich zwei Türöffnungen hergestellt. Die Lösung soll beides vereinen: Die Emporen-Außenwand wird zu einem durchgehenden Bücherregal, das den Raum ordnet und Gewicht bekommt. Der falsch erstellte Durchgang wird von der Arbeitszimmerseite mit einem Regal geschlossen als funktionale Einbautiefe nach innen. Der korrekte Zugang bleibt bestehen, die Tür wird unsichtbar in das Regalsystem integriert: Linien laufen weiter, Fugen greifen durch, Griffe verschwinden im Raster.
                       </p>
-
+                      <p>
+                        Die Inspiration liefert wieder das Haus Rühlstraße klar, ruhig, präzise. Material und Design liegen zunächst bei uns: warmes Holz oder hell und fein? Offene Fächer, integrierte Zargen, verdeckte Bänder alles so, dass Türblatt und Regal als eine Fläche wirken. Bevor es losgeht, sichern wir die Varianten mit den Bauherren ab.   
+                      </p>
                       <h3 class="question">Nun stellt sich die Frage:</h3>
                       <p>
-                        Reicht diese vorgestellte Ausführung wirklich aus, um die Stützen dauerhaft vor
-                        Feuchtigkeit und Fäulnis zu schützen – oder entstehen neue Schwachstellen?
+                        Wie gehen wir vor um unser Ziel zu erreichen?
                       </p>
                     </div>
 
@@ -825,6 +1088,17 @@ function insidePointFor(pts){
 
     const END_EXT = 'png'; // falls deine Dateien .png sind -> 'png'
     let lastAreaSlug = null; // zuletzt geöffneter Bereich
+    const VIDEO_FROM_HOME = "__home__";
+let videoOrigin = null;
+    let videoOriginSlug = null;
+
+    const videos = {
+  default: "assets/videos/intro.mp4", // Startseite
+  "poolhaus": "",
+  "eg": "",
+  "og": "" // leer => „Coming Soon“
+};
+
 
     // Assets
     const assetsBaseInput = document.getElementById('assetsBase');
@@ -864,6 +1138,149 @@ function insidePointFor(pts){
     const slideMeta = document.getElementById('slideMeta');
     const backBtn = document.getElementById('backBtn');
     let nextBgBtn = document.getElementById('nextBgBtn');
+
+    // === VIDEO: Hilfsfunktionen ===
+function toYouTubeEmbed(url){
+  try{
+    const u = new URL(url);
+    if(u.hostname.includes("youtu.be")) return "https://www.youtube.com/embed/" + u.pathname.slice(1);
+    if(u.hostname.includes("youtube.com")){
+      const id = u.searchParams.get("v");
+      return id ? "https://www.youtube.com/embed/" + id : url;
+    }
+  }catch(e){}
+  return url;
+}
+
+function resolveContextVideoSrc(){
+  const fromHome = !slide.classList.contains("open"); // Slide noch zu? => Startseite
+
+  if (fromHome) {
+    // Startseite -> Intro (falls gesetzt), sonst Coming Soon
+    return videos.default || "";
+  }
+
+  // Wir sind in einer Bereichs-Slide:
+  // Nur liefern, wenn ein Eintrag für den Slug existiert – KEIN Default-Fallback!
+  if (lastAreaSlug && Object.prototype.hasOwnProperty.call(videos, lastAreaSlug)) {
+    return videos[lastAreaSlug] || ""; // leer -> Coming Soon
+  }
+
+  // kein Eintrag -> Coming Soon
+  return "";
+}
+
+
+function rememberDesc(){
+  if (!slideDesc.dataset.prev) slideDesc.dataset.prev = slideDesc.innerHTML;
+}
+function restoreDesc(){
+  if (slideDesc.dataset.prev != null){
+    slideDesc.innerHTML = slideDesc.dataset.prev;
+    delete slideDesc.dataset.prev;
+  }
+}
+
+function cleanupVideo(){
+  // Medien stoppen
+  slideDesc.querySelectorAll("video").forEach(v=>{ try{ v.pause(); }catch(e){} });
+  slideDesc.querySelectorAll("iframe").forEach(f=>{ try{ f.src = f.src; }catch(e){} });
+
+  // Inhalt zurücksetzen
+  restoreDesc();
+
+  // Bild wieder zeigen
+  if (slideImg) slideImg.style.display = "";
+
+  // WICHTIG: Videomodus verlassen
+  slide.classList.remove("video-mode");
+  document.documentElement.classList.remove("no-scroll");
+  document.body.classList.remove("no-scroll");
+
+}
+
+
+
+function openContextVideo(){
+  const src = resolveContextVideoSrc();
+  // merken, ob das Video von einer Slide (Slug) kommt oder von der Startseite
+  // Herkunft sauber bestimmen: Ist die Slide gerade geschlossen? -> Startseite
+  const openedFromHome = !slide.classList.contains("open");
+  videoOrigin = openedFromHome ? VIDEO_FROM_HOME : (lastAreaSlug || VIDEO_FROM_HOME);
+
+  // Slide öffnen (auf Startseite ist sie noch zu)
+  slide.classList.add("open");
+  // >>> Fullscreen-Video-Modus aktivieren
+  slide.classList.add("video-mode");
+  document.documentElement.classList.add("no-scroll");
+  document.body.classList.add("no-scroll");
+
+  if (videoOrigin === VIDEO_FROM_HOME){
+    slideTitle.textContent = "";
+    slideMeta.textContent = "";
+  }
+
+  // Bild ausblenden, vorherige Inhalte merken
+  if (slideImg) slideImg.style.display = "none";
+  rememberDesc();
+
+  if (!src){
+    // Kein Video hinterlegt -> Coming Soon (trotz Fullscreen)
+    slideDesc.innerHTML = `<div class="video-wrap"><div class="coming-soon"><span>Coming&nbsp;Soon</span></div></div>`;
+    return;
+  }
+
+  const isYT = /youtu\.be|youtube\.com/.test(src);
+  if (isYT){
+    const embed = toYouTubeEmbed(src);
+    slideDesc.innerHTML = `
+      <div class="video-wrap">
+        <iframe src="${embed}"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen></iframe>
+      </div>
+    `;
+  } else {
+    slideDesc.innerHTML = `
+      <div class="video-wrap">
+        <video src="${src}" controls playsinline preload="metadata"></video>
+      </div>
+    `;
+  }
+}
+
+
+// === VIDEO: Buttons (Startseite + Folie) anschließen ===
+document.querySelectorAll(".introBtn").forEach(btn=>{
+  btn.addEventListener("click", openContextVideo);
+});
+
+// Beim Zurück (Haus-Button) Video aufräumen
+// Back-Button: Wenn Video-Modus AKTIV und Video kam von einer Slide,
+// dann NUR Video-Modus beenden (nicht zur Startseite springen).
+// Back-Button Verhalten je nach Ursprung des Videos
+backBtn.addEventListener("click", function(e){
+  const inVideo = slide.classList.contains("video-mode");
+
+  if (!inVideo) return; // kein Video offen -> nichts Besonderes
+
+  if (videoOrigin === VIDEO_FROM_HOME){
+    // Video kam von der Startseite:
+    // 1) Videomodus aufräumen
+    cleanupVideo();
+    videoOrigin = null;
+    // 2) NICHT verhindern -> bestehende Logik schließt die Slide (zur Startseite)
+    return;
+  }
+
+  // Video kam aus einer Bereichs-Slide:
+  // NICHT zur Startseite springen, nur Videomodus beenden
+  e.preventDefault();
+  e.stopImmediatePropagation?.();
+  cleanupVideo();
+  videoOrigin = null;
+}, true); // << capture=true ist wichtig
+ // <<<<< WICHTIG: capture=true
 
     // Header/Admin
     const adminBtn = document.getElementById('adminBtn');
