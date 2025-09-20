@@ -68,26 +68,13 @@
     .slide-content{ background: linear-gradient(180deg, rgba(17,22,42,.96), rgba(17,22,42,.94)); border-top-left-radius:18px; border-top-right-radius:18px; box-shadow:var(--shadow); padding:12px 16px 18px; max-height: 45vh; overflow:auto; }
     .slide-content h2{ margin:0 0 6px; font-size:18px; }
     .slide-content .meta{ color:var(--muted); font-size:12px; margin-bottom:8px; }
-    .slide-actions{ position:absolute; top:10px; left:10px; display:flex; gap:8px; z-index:2; }
-    .slide-actions button{ background:#18224a; color:#fff; border:1px solid rgba(255,255,255,.2); border-radius:12px; padding:8px 12px; cursor:pointer; }
+
 
     @media (min-width: 860px){
       .slide{ grid-template-columns: 1.2fr .8fr; grid-template-rows: 1fr; }
       .slide-content{ border-top-left-radius:0; height:100%; max-height:none; border-left:1px solid rgba(255,255,255,.06); }
     }
-    .next-btn {
-  position: absolute;
-  top: 80%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(24, 74, 26, 0);
-  border: 2px solid rgba(255, 255, 255, 0);
-  border-radius: 50%;
-  padding: 16px;
-  cursor: pointer;
-  font-size: 50px; /* für Emoji */
-  color: #fff;
-}
+
 /* Lightbox */
 .lightbox{
   position: fixed; inset: 0; z-index: 100;
@@ -196,19 +183,8 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
   .slide-content { max-height: 50svh; }
 }
 
-/* Zurück-/Aktion-Buttons oben links: größere Trefferfläche */
-.slide-actions button{
-  min-width: 40px; min-height: 40px;
-  font-size: clamp(20px, 4.5vw, 28px);
-  padding: clamp(6px, 1.5vw, 8px) clamp(8px, 2vw, 12px);
-}
 
-/* Kamera-Button (Slideshow) zentriert & skaliert */
-.next-btn{
-  top: 78%;
-  font-size: clamp(28px, 8vw, 52px);
-  padding: 0;
-}
+
 
 /* Lightbox schon gut – auf sehr kleinen Screens noch kompakter */
 @media (max-width: 480px){
@@ -311,6 +287,93 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
 @media (max-width: 420px){
   :root{ --pad: 8px; --navW: clamp(44px, 12vw, 64px); --metaH: clamp(28px, 6vh, 56px); }
 }
+/* ===== Slide: Werkzeugleiste am unteren Bildrand ===== */
+.slide-tools{
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 0;                 /* am Bildrand verankert */
+  z-index: 3;                /* über der Bildfläche */
+  display: flex;
+  justify-content: center;
+  padding:
+    8px
+    calc(env(safe-area-inset-right,0px) + 8px)
+    calc(env(safe-area-inset-bottom,0px) + 8px)
+    calc(env(safe-area-inset-left,0px) + 8px);
+  pointer-events: none;      /* nur der innere Container klickbar */
+}
+
+.slide-tools-inner{
+  pointer-events: auto;
+  display: flex; gap: 10px;
+  padding: 6px 8px;
+  background: rgba(245, 246, 248, 0.692);   /* weißlich-grau, leicht transparent */
+  border: 1px solid rgba(0,0,0,.10);
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.20);
+  backdrop-filter: saturate(1.1);
+}
+
+.slide-tools-inner button{
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: #0b1020;
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: clamp(14px, 2.8vw, 16px);
+}
+
+.slide-tools-inner button:hover{ background: rgba(0,0,0,.06); }
+.slide-tools-inner button:focus-visible{
+  outline: 2px solid rgba(40,80,200,.5);
+  outline-offset: 2px;
+}
+
+/* Labels auf sehr kleinen Screens ausblenden */
+.slide-tools-inner .label{ display: inline; }
+@media (max-width: 420px){
+  .slide-tools-inner .label{ display: none; }
+}
+/* 3D-Icon-Knöpfe in der Werkzeugleiste */
+.slide-tools .icon{
+  font-size: 2em;              /* Emoji größer als Text */
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2em;
+  height: 2.2em;
+  border-radius: 50%;            /* runder Knopf */
+  background: linear-gradient(to bottom, #ffffff, #e0e0e0); /* Glanz oben -> unten */
+  box-shadow:
+    inset 0 2px 2px rgba(255,255,255,0.9), /* Glanz innen oben */
+    inset 0 -2px 2px rgba(0,0,0,0.15),     /* Schatten innen unten */
+    0 3px 6px rgba(0,0,0,0.25);            /* äußerer Schatten */
+}
+
+/* Hover: wirkt „höher“ */
+.slide-tools button:hover .icon{
+  background: linear-gradient(to bottom, #fefefe, #d5d5d5);
+  box-shadow:
+    inset 0 2px 2px rgba(255,255,255,0.9),
+    inset 0 -2px 2px rgba(0,0,0,0.15),
+    0 4px 8px rgba(0,0,0,0.35);
+}
+
+/* Aktiv (gedrückt): „eingedrückt“ */
+.slide-tools button:active .icon{
+  background: linear-gradient(to bottom, #d5d5d5, #fefefe);
+  box-shadow:
+    inset 0 3px 4px rgba(0,0,0,0.25),
+    0 1px 2px rgba(0,0,0,0.15);
+  transform: translateY(1px);
+}
 
   </style>
 </head>
@@ -392,14 +455,22 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
 
   <!-- Neue FOLIE -->
   <section class="slide" id="slide" aria-live="polite" aria-modal="true" role="dialog">
-    <div class="slide-actions">
-      <button id="backBtn" aria-label="Zurück" style="font-size: 28px;">🏠</button>
-     
-    </div>
+
     <div class="slide-bg">
       <img id="slideImg" alt="Bereichsbild" />
-      <button id="nextBgBtn" class="next-btn" aria-label="Nächstes Bild" title="Nächstes Bild">📸</button>
-    </div>
+        </div>
+      <div class="slide-tools" aria-label="Werkzeugleiste">
+        <div class="slide-tools-inner">
+          <button id="backBtn" aria-label="Zurück">
+            <span class="icon">🏠</span> <span class="label">Zurück</span>
+            
+          </button>
+          <button id="nextBgBtn" aria-label="Bilder anzeigen" title="Bilder anzeigen">
+            <span class="icon">📸</span> <span class="label">Bilder</span>
+          </button>
+        </div>
+      </div>
+
 
     <article class="slide-content">
       <div class="meta" id="slideMeta"></div>
