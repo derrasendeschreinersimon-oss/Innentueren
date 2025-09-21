@@ -43,13 +43,16 @@
 
     .wrap{ position:relative; width:100%; background:#0f1330; overflow:hidden; }
     .wrap img{ width:100%; height:auto; display:block; aspect-ratio:16/10; object-fit:cover; }
-    .overlay{ position:absolute; inset:0; pointer-events:none; z-index:1; }
+    .overlay{ position:absolute; inset:0; pointer-events:auto; z-index:1; }
     .hotspot{ cursor:pointer; }
     .label{ font-size:11px; fill:#fff; paint-order:stroke; stroke:rgba(0,0,0,.45); stroke-width:3px; font-weight:700; }
     .poly-fill{ fill: rgba(122,162,255,.18); pointer-events:all; stroke: var(--accent); stroke-width:.8; filter: drop-shadow(0 2px 6px var(--ring)); }
 
     .toolbar{ position:relative; z-index:3; display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:10px 16px; border-top:1px solid rgba(255,255,255,.06); background:rgba(15,19,48,0.9); }
-    .toolbar button, .toolbar label, .toolbar select, .toolbar input[type="text"]{ background:#18224a; color:#fff; border:1px solid rgba(255,255,255,.16); border-radius:12px; padding:8px 12px; cursor:pointer; }
+    .toolbar label, .toolbar select, .toolbar input[type="text"]{
+      background:#18224a; color:#fff; border:1px solid rgba(255,255,255,.16);
+      border-radius:12px; padding:8px 12px; cursor:pointer;
+      }
     .toolbar select{ padding-right:28px; }
     .toolbar input[type="file"]{ display:none; }
 
@@ -62,7 +65,7 @@
       stroke-width: 0 !important;
       filter: none !important;
       -webkit-filter: none !important;
-      pointer-events: auto !important; /* Klickbar lassen */
+      pointer-events: all !important; /* SVG bleibt klickbar, auch wenn unsichtbar */
     }
     body:not(.is-admin) .label{ display:none !important; }
     /* Sicherheitsnetz für temporäre Edit-/Mess-Ebenen */
@@ -128,9 +131,6 @@
   font-size: 28px;
   user-select: none;
 }
-.lb-prev{ grid-area: prev; }
-.lb-next{ grid-area: next; }
-
 
 /* Rollen-Modal */
 .role-modal{
@@ -363,40 +363,7 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
 @media (max-width: 420px){
   .slide-tools-inner .label{ display: none; }
 }
-/* 3D-Icon-Knöpfe in der Werkzeugleiste */
-.slide-tools .icon{
-  font-size: 2em;              /* Emoji größer als Text */
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.2em;
-  height: 2.2em;
-  border-radius: 50%;            /* runder Knopf */
-  background: linear-gradient(to bottom, #ffffff, #e0e0e0); /* Glanz oben -> unten */
-  box-shadow:
-    inset 0 2px 2px rgba(255,255,255,0.9), /* Glanz innen oben */
-    inset 0 -2px 2px rgba(0,0,0,0.15),     /* Schatten innen unten */
-    0 3px 6px rgba(0,0,0,0.25);            /* äußerer Schatten */
-}
 
-/* Hover: wirkt „höher“ */
-.slide-tools button:hover .icon{
-  background: linear-gradient(to bottom, #fefefe, #d5d5d5);
-  box-shadow:
-    inset 0 2px 2px rgba(255,255,255,0.9),
-    inset 0 -2px 2px rgba(0,0,0,0.15),
-    0 4px 8px rgba(0,0,0,0.35);
-}
-
-/* Aktiv (gedrückt): „eingedrückt“ */
-.slide-tools button:active .icon{
-  background: linear-gradient(to bottom, #d5d5d5, #fefefe);
-  box-shadow:
-    inset 0 3px 4px rgba(0,0,0,0.25),
-    0 1px 2px rgba(0,0,0,0.15);
-  transform: translateY(1px);
-}
 /* === Info-Karte im Arbeitsblatt-Stil === */
 .slide-content .info-card{
   background: rgba(152, 251, 152, 0.25);
@@ -505,44 +472,6 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
   gap: 8px;
 }
 
-/* === Video/Coming Soon (falls nicht schon vorhanden) === */
-.video-wrap {
-  position: relative;
-  width: 100%;
-  max-width: 100%;
-  aspect-ratio: 16 / 9;
-  background: #000;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-}
-.video-wrap iframe,
-.video-wrap video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
-.coming-soon {
-  display: grid;
-  place-items: center;
-  min-height: 220px;
-  padding: 24px;
-  border-radius: 12px;
-  background: repeating-linear-gradient(
-    45deg,
-    rgba(255,255,255,.06) 0 12px,
-    rgba(255,255,255,.03) 12px 24px
-  );
-  color: var(--muted);
-  font-weight: 700;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  box-shadow: var(--shadow);
-}
-.coming-soon span { opacity: .9; font-size: 18px; }
-
 /* === Fullscreen-Video-Modus in der Slide (neu) === */
 #slide.video-mode {
   position: fixed;            /* über alles legen */
@@ -558,6 +487,12 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
   overflow: hidden;           /* nichts herausragen lassen */
   z-index: 9999;
 }
+/* Im Videomodus nur den Home-Button zeigen */
+#slide.video-mode .slide-tools .tool-btn:not(#backBtn),
+#slide.video-mode .slide-tools .linksBtn {
+  display: none !important;
+}
+
 
 /* alles außer Video ausblenden */
 #slide.video-mode #slideImg,
@@ -612,26 +547,22 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
   padding: 0 !important;
 }
 #slide.video-mode #backBtn {
-  backdrop-filter: blur(8px);
-  border-radius: 9999px;
+backdrop-filter: none; /* kein extra Blur */
+background: transparent; /* Hintergrund kommt aus .tool-icon */
+border-radius: 12px; /* Standard wie tool-btn */
+box-shadow: none; /* kein Extra-Schatten */
 }
 
 
-/* Home-Button (Back) als einzige sichtbare Aktion, oben links „schwebend“ */
-#slide.video-mode .slide-tools {
-  position: fixed;
-  top: 16px;
-  left: 16px;
-  right: auto;
-  bottom: auto;
-  background: transparent;
-  box-shadow: none;
-  padding: 0;
+#slide.video-mode #backBtn .tool-icon {
+/* ganz normales 3D-Design erzwingen */
+background: linear-gradient(to bottom, #ffffff, #e0e0e0);
+box-shadow:
+inset 0 2px 2px rgba(255,255,255,0.9),
+inset 0 -2px 2px rgba(0,0,0,0.15),
+0 3px 6px rgba(0,0,0,0.25);
 }
-#slide.video-mode #backBtn {
-  backdrop-filter: blur(8px);
-  border-radius: 9999px;
-}
+
 #slide.video-mode #backBtn .label {
   /* Wenn du nur das Icon willst, Zeile aktivieren: */
   /* display: none; */
@@ -686,6 +617,379 @@ html.no-scroll, body.no-scroll { overflow: hidden !important; }
   }
 }
 
+.slide-tools-inner .linksBtn,
+.slide-tools.slide-tools--home .linksBtn{
+background: transparent; /* übernimmt Standard .tool-btn + .tool-icon */
+border: 0;
+padding: 0;
+}
+
+
+/* Label ausblenden, wenn die Leisten nur Icons zeigen sollen */
+.slide-tools .linksBtn .label{ display:none; }
+
+/* Variante der runden Scheibe: komplett rot mit „i“ */
+.i3d {
+  width: 1.2em;
+  height: 1.2em;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+
+  background: radial-gradient(120% 120% at 30% 28%,
+             #ff7a7a 0%, #ff3b3b 35%, #d41313 65%, #8c0b0b 100%);
+  box-shadow:
+    inset 0 2px 2px rgba(255,255,255,.35),
+    inset 0 -2px 4px rgba(0,0,0,.35);
+}
+
+.i3d::before {
+  content: "i";
+  color:#fff;
+  font-weight: 800;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", Arial;
+  font-size: 0.9em;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(0,0,0,.35), 0 0 2px rgba(255,255,255,.2);
+}
+
+
+
+/* Hover/Active – wie bei den anderen Buttons */
+.slide-tools-inner .linksBtn:hover,
+.slide-tools.slide-tools--home .linksBtn:hover{
+  box-shadow:
+    0 10px 22px rgba(0,0,0,.26),
+    inset 0 1px 0 rgba(255,255,255,.75);
+}
+.slide-tools-inner .linksBtn:active,
+.slide-tools.slide-tools--home .linksBtn:active{
+  transform: translateY(1px);
+}
+
+/* === Einheitliches Knopf-Design === */
+.tool-btn{
+appearance:none; background:transparent; border:0; color:#0b1020; font:inherit;
+display:inline-flex; align-items:center; gap:8px; padding:10px 12px;
+border-radius:12px; cursor:pointer; font-size: clamp(14px, 2.8vw, 16px);
+}
+.tool-btn:hover{ background: rgba(0,0,0,.06); }
+.tool-btn:focus-visible{ outline: 2px solid rgba(40,80,200,.5); outline-offset: 2px; }
+
+
+/* runde 3D-Scheibe für das Icon */
+.tool-icon{
+font-size: 2em; line-height:1; display:inline-flex; align-items:center; justify-content:center;
+width: 2.2em; height: 2.2em; border-radius: 50%;
+background: linear-gradient(to bottom, #ffffff, #e0e0e0);
+box-shadow:
+inset 0 2px 2px rgba(255,255,255,0.9),
+inset 0 -2px 2px rgba(0,0,0,0.15),
+0 3px 6px rgba(0,0,0,0.25);
+}
+.tool-btn:hover .tool-icon{
+background: linear-gradient(to bottom, #fefefe, #d5d5d5);
+box-shadow:
+inset 0 2px 2px rgba(255,255,255,0.9),
+inset 0 -2px 2px rgba(0,0,0,0.15),
+0 4px 8px rgba(0,0,0,0.35);
+}
+.tool-btn:active .tool-icon{
+background: linear-gradient(to bottom, #d5d5d5, #fefefe);
+box-shadow:
+inset 0 3px 4px rgba(0,0,0,0.25),
+0 1px 2px rgba(0,0,0,0.15);
+transform: translateY(1px);
+}
+
+/* === App-Page Modus (für die Info-Seite) === */
+#slide.app-mode .slide-bg{ display:none !important; }
+#slide.app-mode .slide-content{
+background: transparent !important; /* kein Panel-Hintergrund */
+border-left: 0 !important; /* Rahmen weg (Desktop) */
+padding: 16px !important; /* dezente Luft */
+}
+/* === APP-MODUS: nur Back-Button oben links, keine untere Toolbar === */
+#slide.app-mode .slide-tools {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  right: auto;
+  bottom: auto;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* ALLES außer Back-Button ausblenden */
+#slide.app-mode .slide-tools .tool-btn:not(#backBtn),
+#slide.app-mode .slide-tools .linksBtn {
+  display: none !important;
+}
+
+/* Back-Button-Optik wie gewohnt (kein Sonder-Blur etc.) */
+#slide.app-mode #backBtn{
+  backdrop-filter: none;
+  background: transparent;
+  border-radius: 12px;
+  box-shadow: none;
+}
+#slide.app-mode #backBtn .tool-icon{
+  background: linear-gradient(to bottom, #ffffff, #e0e0e0);
+  box-shadow:
+    inset 0 2px 2px rgba(255,255,255,0.9),
+    inset 0 -2px 2px rgba(0,0,0,0.15),
+    0 3px 6px rgba(0,0,0,0.25);
+}
+
+/* Platz nach oben für den Back-Button im App-Modus */
+#slide.app-mode .app-page {
+  padding-top: 120px; /* ca. 60px Buttonhöhe + Abstand */
+}
+
+/* App-Page: Buttons im selben Format wie die übrigen Tool-Buttons */
+/* ===== App-Page: vertikale Liste mit eigener "Mini-Toolbar" je Zeile ===== */
+
+
+/* Eine Spalte: nur Liste */
+#slide.app-mode .app-grid{
+  display: block;
+}
+
+/* Vertikale Liste: Einträge füllen die Breite */
+#slide.app-mode .app-list{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+}
+
+/* Jede Zeile wirkt wie eine kleine Werkzeugleiste */
+#slide.app-mode .app-row{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+
+  background: rgba(245, 246, 248, 0.72);
+  border: 1px solid rgba(0,0,0,.10);
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.20);
+  backdrop-filter: saturate(1.1);
+}
+
+/* Der Button links: exakt wie deine Tool-Buttons */
+#slide.app-mode .app-row .tool-btn{
+  background: transparent;
+  border: 0;
+  padding: 8px 10px;
+  border-radius: 12px;
+}
+#slide.app-mode .app-row .tool-btn:hover{ background: rgba(0,0,0,.06); }
+
+#slide.app-mode .app-row .tool-btn .tool-icon{
+  font-size: 2em;
+  line-height: 1;
+  width: 2.2em;
+  height: 2.2em;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to bottom, #ffffff, #e0e0e0);
+  box-shadow:
+    inset 0 2px 2px rgba(255,255,255,0.9),
+    inset 0 -2px 2px rgba(0,0,0,0.15),
+    0 3px 6px rgba(0,0,0,0.25);
+}
+#slide.app-mode .app-row .tool-btn:hover .tool-icon{
+  background: linear-gradient(to bottom, #fefefe, #d5d5d5);
+  box-shadow:
+    inset 0 2px 2px rgba(255,255,255,0.9),
+    inset 0 -2px 2px rgba(0,0,0,0.15),
+    0 4px 8px rgba(0,0,0,0.35);
+}
+#slide.app-mode .app-row .tool-btn:active .tool-icon{
+  background: linear-gradient(to bottom, #d5d5d5, #fefefe);
+  box-shadow:
+    inset 0 3px 4px rgba(0,0,0,0.25),
+    0 1px 2px rgba(0,0,0,0.15);
+  transform: translateY(1px);
+}
+
+/* Beschreibung steht immer rechts daneben */
+#slide.app-mode .app-desc{
+  color: var(--text);
+  opacity: .95;
+  font-size: 14px;
+  line-height: 1.4;
+}
+#slide.app-mode .app-desc .title{
+  display:inline-block;
+  font-weight: 700;
+  margin-right: .35rem;
+}
+
+/* Kleinere Screens: Button oben, Text darunter */
+@media (max-width: 560px){
+  #slide.app-mode .app-row{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+/* --- Anker für den Tutorial-Button (oben links auf der Slide) --- */
+#areaTutFloat {
+  position: absolute;
+  top: 12px;
+  left: 120px;
+  z-index: 1000;
+  pointer-events: none; /* Container nimmt keine Klicks */
+}
+
+#areaTutFloat > .tool-btn {
+  pointer-events: auto; /* nur der Button selbst klickbar */
+}
+
+
+
+.app-tile:hover { background: rgba(0,0,0,.06); } /* wie .tool-btn:hover */
+.app-tile:focus-visible {
+  outline: 2px solid rgba(40,80,200,.5);
+  outline-offset: 2px;
+}
+
+/* die runde Scheibe genau wie sonst (Größe ggf. leicht größer fürs Grid) */
+.app-tile .tool-icon {
+  font-size: 2em;                  /* identisch zu deinen Leisten-Buttons */
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2em;
+  height: 2.2em;
+  border-radius: 50%;
+  background: linear-gradient(to bottom, #ffffff, #e0e0e0);
+  box-shadow:
+    inset 0 2px 2px rgba(255,255,255,0.9),
+    inset 0 -2px 2px rgba(0,0,0,0.15),
+    0 3px 6px rgba(0,0,0,0.25);
+}
+.app-tile:hover .tool-icon {
+  background: linear-gradient(to bottom, #fefefe, #d5d5d5);
+  box-shadow:
+    inset 0 2px 2px rgba(255,255,255,0.9),
+    inset 0 -2px 2px rgba(0,0,0,0.15),
+    0 4px 8px rgba(0,0,0,0.35);
+}
+.app-tile:active .tool-icon {
+  background: linear-gradient(to bottom, #d5d5d5, #fefefe);
+  box-shadow:
+    inset 0 3px 4px rgba(0,0,0,0.25),
+    0 1px 2px rgba(0,0,0,0.15);
+  transform: translateY(1px);
+}
+
+/* Label mittig, dezente Größe – wie bei dir üblich */
+.app-tile .label {
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Titel der App-Beschreibung */
+.app-desc .title {
+  color: #100f0f;     /* hier deine Wunschfarbe */
+  font-weight: bold;  /* optional: hervorheben */
+}
+
+/* Fließtext der App-Beschreibung */
+.app-desc span:not(.title) {
+  color: #100f0f;     /* andere Farbe für den erklärenden Text */
+  font-size: 0.9rem;  /* optional: kleinere Schrift */
+}
+
+.notes-page {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 20px;
+  background: #fff; /* oder transparent, je nach Wunsch */
+}
+
+.notes-page .tool-btn {
+  font-size: 2rem;
+}
+
+/* Platzhalter-Kacheln: kein Hover, kein Klick-Cursor */
+.app-tile--disabled {
+  pointer-events: none;
+  opacity: .65;
+  cursor: default;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.contact-form input,
+.contact-form textarea {
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+}
+
+.contact-form button {
+  align-self: flex-start;
+  margin-top: 10px;
+}
+
+/* NEU: Top-right Toolbar im Startbild */
+.home-tools{
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;               /* über dem Bild/Overlay */
+  pointer-events: none;     /* Container blockt nicht */
+}
+.home-tools .slide-tools-inner{
+  pointer-events: auto;     /* nur die eigentliche Leiste ist klickbar */
+}
+
+/* Optional: auf sehr kleinen Screens Labels ausblenden (wie gewohnt) */
+@media (max-width: 420px){
+  .home-tools .label{ display: none; }
+}
+
+/* Tutorial: Overlay + Fokus + Tooltip */
+.tut-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:9998; display:none; }
+.tut-focus  { position:absolute; border:2px solid #fff; border-radius:12px;
+  box-shadow:0 0 0 6px rgba(255,255,255,.25), 0 12px 30px rgba(0,0,0,.4);
+  z-index:9999; display:none; pointer-events:none; transition:all .2s ease; }
+.tut-tooltip{ position:absolute; max-width:min(90vw,360px); background:#10162a; color:#fff;
+  border:1px solid rgba(255,255,255,.2); border-radius:12px; padding:12px 14px;
+  z-index:10000; box-shadow:0 12px 28px rgba(0,0,0,.4); font-size:.95rem; line-height:1.35; display:none; }
+.tut-actions { margin-top:10px; display:flex; gap:8px; }
+.tut-btn{ appearance:none; background:#1f2b4d; color:#fff; border:1px solid rgba(255,255,255,.2);
+  border-radius:10px; padding:8px 10px; cursor:pointer; font:inherit; }
+.tut-btn:hover{ background:#273663; }
+.tut-btn--skip::before{ content:"✖️ "; }
+.tut-btn--next::after{ content:" ▶️"; }
+
+/* Pfeil (blinkend) */
+.tut-arrow{ position:absolute; width:34px; height:34px; z-index:10000; display:none; animation:tutBlink 1s ease-in-out infinite; }
+.tut-arrow::before{ content:"⬇️"; font-size:28px; display:block; }
+@keyframes tutBlink{ 0%,100%{ transform:translateY(0); opacity:.9; } 50%{ transform:translateY(6px); opacity:.3; } }
+
+
   </style>
 </head>
 <body>
@@ -709,6 +1013,19 @@ html.no-scroll, body.no-scroll { overflow: hidden !important; }
     <div class="wrap">
       <img id="baseImage" src="haus.png" alt="Abbildung eines Hauses" />
       <svg class="overlay" id="overlay" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+          <!-- NEU: Home-Infobar oben rechts im Bild -->
+        <div class="home-tools" aria-label="Infoleiste">
+      <div class="slide-tools-inner">
+        <button class="linksBtn tool-btn" type="button" title="Infopage öffnen">
+          <span class="tool-icon">
+            <!-- nutzt deine bereits gestylte rote i-Scheibe -->
+            <span class="i3d" aria-hidden="true"></span>
+          </span>
+          <span class="label">Info</span>
+        </button>
+      </div>
+    </div>
+
     </div>
 
     <div class="toolbar">
@@ -725,10 +1042,10 @@ html.no-scroll, body.no-scroll { overflow: hidden !important; }
                   <!-- Mini-Werkzeugleiste in der Start-Toolbar -->
       <div class="slide-tools slide-tools--mini">
         <div class="slide-tools-inner">
-          <button class="introBtn" type="button" title="Einstiegsvideo ansehen">
-            <span class="icon">🎬</span>
-            <span class="label">Video</span>
-          </button>
+        <button class="introBtn tool-btn" type="button" title="Einstiegsvideo ansehen">
+        <span class="tool-icon">🎬</span>
+        <span class="label">Video</span>
+        </button>
         </div>
       </div>
 
@@ -785,23 +1102,28 @@ html.no-scroll, body.no-scroll { overflow: hidden !important; }
 
   <!-- Neue FOLIE -->
   <section class="slide" id="slide" aria-live="polite" aria-modal="true" role="dialog">
-
     <div class="slide-bg">
       <img id="slideImg" alt="Bereichsbild" />
         </div>
       <div class="slide-tools" aria-label="Werkzeugleiste">
         <div class="slide-tools-inner">
-          <button id="backBtn" aria-label="Zurück">
-            <span class="icon">🏠</span> <span class="label">Zurück</span>
-            
+              <button id="backBtn" class="tool-btn" aria-label="Zurück">
+              <span class="tool-icon">🏠</span> <span class="label">Zurück</span>
+              </button>
+              <button id="nextBgBtn" class="tool-btn" aria-label="Bilder anzeigen" title="Bilder anzeigen">
+              <span class="tool-icon">📸</span> <span class="label">Bilder</span>
+              </button>
+              <button class="introBtn tool-btn" type="button" title="Video zum Bereich ansehen">
+              <span class="tool-icon">🎬</span>
+              <span class="label">Video</span>
+              </button>
+
+           <button class="linksBtn tool-btn" type="button" title="Externe Links">
+            <span class="tool-icon">
+              <span class="i3d" aria-hidden="true"></span>
+            </span>
+            <span class="label">Links</span>
           </button>
-          <button id="nextBgBtn" aria-label="Bilder anzeigen" title="Bilder anzeigen">
-            <span class="icon">📸</span> <span class="label">Bilder</span>
-          </button>
-              <button class="introBtn" type="button" title="Video zum Bereich ansehen">
-        <span class="icon">🎬</span>
-        <span class="label">Video</span>
-        </button>
 
 
         </div>
@@ -817,8 +1139,8 @@ html.no-scroll, body.no-scroll { overflow: hidden !important; }
   <!-- Rollen-Dialog -->
   <div id="roleModal" class="role-modal" aria-modal="true" role="dialog">
     <div class="role-card" role="document" aria-labelledby="roleTitle">
-      <h2 id="roleTitle">Willkommen beim Projekt</h2>
-      <p>Bitte wähle eine Rolle aus.</p>
+      <h2 id="roleTitle">Bitte wähle eine Rolle aus.</h2>
+      <p></p>
       <div class="role-actions">
       <button id="roleStudent" class="role-btn">Schüler</button>
       <button id="roleTeacher" class="role-btn">Lehrer</button>
@@ -827,15 +1149,26 @@ html.no-scroll, body.no-scroll { overflow: hidden !important; }
   </div>
 
 <!-- Lightbox / Slideshow -->
-<div id="lightbox" class="lightbox" aria-live="polite" aria-modal="true" role="dialog" style="display:none">
-  <button class="lb-close" id="lbClose" aria-label="Schließen">✕</button>
+      <div id="lightbox" class="lightbox" aria-live="polite" aria-modal="true" role="dialog" style="display:none">
+        <button class="lb-close" id="lbClose" aria-label="Schließen">✕</button>
 
-  <button class="lb-nav lb-prev" id="lbPrev" aria-label="Vorheriges Bild">‹</button>
-  <img id="lbImg" class="lb-img" alt="Slideshow Bild" />
-  <button class="lb-nav lb-next" id="lbNext" aria-label="Nächstes Bild">›</button>
+        <button class="lb-nav lb-prev" id="lbPrev" aria-label="Vorheriges Bild">‹</button>
+        <img id="lbImg" class="lb-img" alt="Slideshow Bild" />
+        <button class="lb-nav lb-next" id="lbNext" aria-label="Nächstes Bild">›</button>
 
-  <div class="lb-meta" id="lbMeta"></div>
-</div>
+        <div class="lb-meta" id="lbMeta"></div>
+      </div>
+<!-- Tutorial Layer -->
+      <div id="tutOverlay" class="tut-overlay" aria-hidden="true"></div>
+      <div id="tutFocus"   class="tut-focus"   aria-hidden="true"></div>
+      <div id="tutArrow"   class="tut-arrow"   aria-hidden="true"></div>
+      <div id="tutTip"     class="tut-tooltip" role="dialog" aria-live="polite" aria-modal="false">
+        <div id="tutText">—</div>
+        <div class="tut-actions">
+          <button id="tutSkip" class="tut-btn tut-btn--skip" type="button">Überspringen</button>
+          <button id="tutNext" class="tut-btn tut-btn--next" type="button">Weiter</button>
+        </div>
+      </div>
 
   <script>
     //font
@@ -936,7 +1269,21 @@ function insidePointFor(pts){
       if(minD2 > bestD2){ bestD2 = minD2; best = pt; }
     }
   }
+
+  // 3) Falls nichts gefunden (extrem schmal): nimm einfach den Vertex-Mittelwert
+  if(!best){
+    const x = pts.reduce((s,p)=>s+p.x,0)/pts.length;
+    const y = pts.reduce((s,p)=>s+p.y,0)/pts.length;
+    best = {x,y};
+  }
+  // Begrenzen auf [0..100], nur zur Sicherheit
+  return { x: clamp(best.x, 0, 100), y: clamp(best.y, 0, 100) };
+}
   // === Toolbar-Höhe messen und als CSS-Variable setzen ===
+  (function setupToolsHeightOnce(){
+  // Schutz: keine doppelte Initialisierung
+  if (window.__toolsHeightSetup) return;
+  window.__toolsHeightSetup = true;
 function updateToolsHeight(){
   const tools = document.querySelector('#slide .slide-tools');
   if(!tools) return;
@@ -962,15 +1309,13 @@ if (window.visualViewport){
 // z.B. in deiner openArea(...) oder nachdem du #slideDesc befüllst:
 // updateToolsHeight();
 
-  // 3) Falls nichts gefunden (extrem schmal): nimm einfach den Vertex-Mittelwert
-  if(!best){
-    const x = pts.reduce((s,p)=>s+p.x,0)/pts.length;
-    const y = pts.reduce((s,p)=>s+p.y,0)/pts.length;
-    best = {x,y};
+// Ein Initial-Messungstrigger schadet nicht:
+  if (document.readyState !== 'loading') {
+    requestAnimationFrame(updateToolsHeight);
+  } else {
+    document.addEventListener('DOMContentLoaded', updateToolsHeight, { once: true });
   }
-  // Begrenzen auf [0..100], nur zur Sicherheit
-  return { x: clamp(best.x, 0, 100), y: clamp(best.y, 0, 100) };
-}
+})();
 
 
     function canUseLocalStorage(){
@@ -1138,8 +1483,11 @@ if (window.visualViewport){
     const END_EXT = 'png'; // falls deine Dateien .png sind -> 'png'
     let lastAreaSlug = null; // zuletzt geöffneter Bereich
     const VIDEO_FROM_HOME = "__home__";
-let videoOrigin = null;
+    let videoOrigin = null;
     let videoOriginSlug = null;
+    const APP_FROM_HOME = "__home__";
+    let appOrigin = null; // "__home__" oder ein Bereichs-Slug (z. B. "eg")
+
 
     const videos = {
   default: "assets/videos/intro.mp4", // Startseite
@@ -1286,6 +1634,15 @@ function cleanupVideo(){
 
 }
 
+function cleanupApp(){
+  // Inhalt zurücksetzen
+  restoreDesc();
+  // Bild wieder zeigen
+  if (slideImg) slideImg.style.display = "";
+  // App-Modus aus
+  slide.classList.remove("app-mode");
+}
+
 
 
 function openContextVideo(){
@@ -1369,33 +1726,47 @@ document.querySelectorAll(".introBtn").forEach(btn=>{
   btn.addEventListener("click", openContextVideo);
 });
 
-// Beim Zurück (Haus-Button) Video aufräumen
-// Back-Button: Wenn Video-Modus AKTIV und Video kam von einer Slide,
-// dann NUR Video-Modus beenden (nicht zur Startseite springen).
-// Back-Button Verhalten je nach Ursprung des Videos
+// Back-Button: Video- oder App-Modus korrekt verlassen
 backBtn.addEventListener("click", function(e){
   const inVideo = slide.classList.contains("video-mode");
+  const inApp   = slide.classList.contains("app-mode");
 
-  if (!inVideo) return; // kein Video offen -> nichts Besonderes
+  if (!inVideo && !inApp) return; // normales Verhalten weiterlaufen lassen
 
-  if (videoOrigin === VIDEO_FROM_HOME){
-    // Video kam von der Startseite:
-    // 1) Videomodus aufräumen
+  // --- Videomodus ---
+  if (inVideo){
+    if (videoOrigin === VIDEO_FROM_HOME){
+      cleanupVideo();
+      localStorage.setItem(INTRO_SEEN_KEY,'1');
+      setHomeBgAfter();
+      videoOrigin = null;
+      return;
+    }
+    // Video kam aus einer Bereichs-Slide -> nur Vollbild beenden
+    e.preventDefault();
+    e.stopImmediatePropagation?.();
     cleanupVideo();
-    localStorage.setItem(INTRO_SEEN_KEY,'1');
-    setHomeBgAfter();
     videoOrigin = null;
     return;
-    }
+  }
 
-  // Video kam aus einer Bereichs-Slide:
-  // NICHT zur Startseite springen, nur Videomodus beenden
-  e.preventDefault();
-  e.stopImmediatePropagation?.();
-  cleanupVideo();
-  videoOrigin = null;
-}, true); // << capture=true ist wichtig
- // <<<<< WICHTIG: capture=true
+  // --- App-Modus ---
+  if (inApp){
+    e.preventDefault();
+    e.stopImmediatePropagation?.();
+
+    if (appOrigin === APP_FROM_HOME){
+      // App kam von Startseite -> App aufräumen & Slide schließen
+      cleanupApp();
+      appOrigin = null;
+      slide.classList.remove("open");
+    } else {
+      // App kam aus Bereichs-Slide -> App-Modus beenden, Slide bleibt
+      cleanupApp();
+      appOrigin = null;
+    }
+  }
+}, true); // capture=true
 
     // Header/Admin
     const adminBtn = document.getElementById('adminBtn');
@@ -1486,6 +1857,7 @@ backBtn.addEventListener("click", function(e){
           const poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
           poly.setAttribute('points', h.points.map(p=>`${p.x},${p.y}`).join(' '));
           poly.setAttribute('class','poly-fill');
+          poly.style.pointerEvents = 'all';
           poly.addEventListener('click', (e)=>{ if(!measureMode && !editing){ e.stopPropagation(); openSlide(h);} });
           poly.addEventListener('dblclick', (e)=>{ if(isAdmin){ e.preventDefault(); setSelectedIndex(i); enterEditMode(); }});
           g.appendChild(poly);
@@ -1611,6 +1983,285 @@ backBtn.addEventListener("click", function(e){
       applyPointerEvents();
       document.getElementById('toggleLabels')?.setAttribute('aria-pressed', String(labelsOn));
     }
+// === INFO: App-Page öffnen ===
+function openLinksAppPage(){
+  // Herkunft bestimmen: Slide noch zu? -> Startseite, sonst aktueller Bereich
+  const openedFromHome = !slide.classList.contains('open');
+  appOrigin = openedFromHome ? APP_FROM_HOME : (lastAreaSlug || APP_FROM_HOME);
+
+  // Slide öffnen & App-Modus aktivieren
+  slide.classList.add('open');
+  slide.classList.add('app-mode');
+
+  // Bild ausblenden & alten Inhalt merken (für sauberes Zurück)
+  if (slideImg) slideImg.style.display = 'none';
+  if (!slideDesc.dataset.prev) slideDesc.dataset.prev = slideDesc.innerHTML;
+
+  slideTitle.textContent = '';
+  slideMeta.textContent = '';
+
+  // Inhalt: Raster aus Kacheln/Buttons
+    slideDesc.innerHTML = `
+  <div class="app-page">
+    <div class="app-grid">
+      <div class="app-list">
+
+          <div class="app-row">
+            <button class="tool-btn app-tile" id="appOpenBrowser" type="button" title="Externe Seite öffnen">
+              <span class="tool-icon">🏛️</span>
+              <span class="label" style="display:none">Browser</span>
+            </button>
+            <div class="app-desc">
+              <span class="title">Haus Rühlstraße - Erfurt </span>
+              <span></span>
+            </div>
+          </div>
+
+            <div class="app-row">
+                <button class="tool-btn app-tile" id="appOpenNotes" type="button" title="Notizen öffnen">
+                  <span class="tool-icon">🗒️</span>
+                  <span class="label" style="display:none">Notizen</span>
+                </button>
+                <div class="app-desc">
+                  <span class="title">Themen</span>
+                  <span>Stationen der Unterrichtsreihe.</span>
+                </div>
+              </div>
+
+
+                      <div class="app-row">
+              <button class="tool-btn app-tile" id="appOpenOlat" type="button" title="OpenOlat öffnen">
+                <span class="tool-icon">♾️</span>
+                <span class="label" style="display:none">OpenOlat</span>
+              </button>
+              <div class="app-desc">
+                <span class="title">OpenOlat</span>
+                <span> Materialien </span>
+              </div>
+            </div>
+   
+                        <div class="app-row">
+              <button class="tool-btn app-tile" id="appOpenLinks" type="button" title="Hilfreiche Websites öffnen">
+                <span class="tool-icon">🌐</span>
+                <span class="label" style="display:none">Links</span>
+              </button>
+              <div class="app-desc">
+                <span class="title">Hilfreiche Websites</span>
+                <span></span>
+              </div>
+            </div>
+
+            <div class="app-row">
+                <button class="tool-btn app-tile" id="appOpenContact" type="button" title="Kontaktformular öffnen">
+                  <span class="tool-icon">✉️</span>
+                  <span class="label" style="display:none">Kontakt</span>
+                </button>
+                <div class="app-desc">
+                  <span class="title">Kontakt</span>
+                  <span>Schreibe eine Nachricht an den Kunden.</span>
+                </div>
+              </div>
+
+              </div>
+            </div>
+          </div>
+`;
+      // Browser-Kachel: Warnen & externen Link öffnen
+      const btnBrowser = document.getElementById('appOpenBrowser');
+      if (btnBrowser) {
+        btnBrowser.addEventListener('click', () => {
+          const url = 'https://www.detail.de/de_de/bekroenendes-fusswalmdach-haus-ruehlstrasse-von-alex-lehnerer?srsltid=AfmBOopyNHUNIz6VSFoaIWwCU42yu5f0VcStJDTrlKlZed10'; // <- deine Ziel-URL
+          const ok = confirm('Achtung: Sie verlassen die App und öffnen eine externe Website. Fortfahren?');
+          if (ok) window.open(url, '_blank');
+        });
+      }
+            // === OpenOlat-Button Event ===
+      const btnOlat = document.getElementById('appOpenOlat');
+      if (btnOlat) {
+        btnOlat.addEventListener('click', () => {
+          const url = 'https://olat.bbslu.de/auth/RepositoryEntry/171835477/CourseNode/112064557938997/path%3D~~Projekt%20Stadtvilla%20M%C3%BCller/0'; // <- hier deine echte OLAT-URL einsetzen
+          const ok = confirm('Achtung: Sie verlassen die App und öffnen OpenOlat. Fortfahren?');
+          if (ok) window.open(url, '_blank');
+        });
+      }
+
+// === Notizen-Button Event (ersetzt die alte Version) ===
+const btnNotes = document.getElementById('appOpenNotes');
+if (btnNotes) {
+  btnNotes.addEventListener('click', () => {
+    // Wir bleiben im app-mode, nur den Inhalt der Slide austauschen,
+    // damit die Seite genauso aussieht wie die App-Page (gleiches Grid).
+    slide.classList.add('app-mode');         // sicherstellen
+    slideTitle.textContent = '';             // kein Titel
+    slideMeta.textContent = '';              // keine Meta-Zeile
+
+    slideDesc.innerHTML = `
+      <div class="app-page">
+        <div class="app-grid">
+          <div class="app-list">
+
+            <!-- Platzhalter 1 -->
+            <div class="app-row">
+              <button class="tool-btn app-tile app-tile--disabled" type="button" title="Platzhalter">
+                <span class="tool-icon">⬜</span>
+                <span class="label" style="display:none">Maßgebung im Hochbau</span>
+              </button>
+              <div class="app-desc">
+                <span class="title">Platzhalter</span>
+                <span>Maßordnung im Hochbau.</span>
+              </div>
+            </div>
+
+            <!-- Platzhalter 2 -->
+            <div class="app-row">
+              <button class="tool-btn app-tile app-tile--disabled" type="button" title="Platzhalter">
+                <span class="tool-icon">⬜</span>
+                <span class="label" style="display:none">Platzhalter</span>
+              </button>
+              <div class="app-desc">
+                <span class="title">Platzhalter</span>
+                <span>Weitere Kachel als Platzhalter für kommende Inhalte.</span>
+              </div>
+            </div>
+
+            <!-- Platzhalter 3 -->
+            <div class="app-row">
+              <button class="tool-btn app-tile app-tile--disabled" type="button" title="Platzhalter">
+                <span class="tool-icon">⬜</span>
+                <span class="label" style="display:none">Platzhalter</span>
+              </button>
+              <div class="app-desc">
+                <span class="title">Platzhalter</span>
+                <span>Noch eine Kachel für zukünftige Funktionen.</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    `;
+
+    // KEINE Event-Handler binden -> bewusst funktionslos
+    // Home/Back (🏠) läuft weiterhin über deinen bestehenden backBtn-Handler.
+  });
+}
+// === Kontakt-Button Event ===
+const btnContact = document.getElementById('appOpenContact');
+if (btnContact) {
+  btnContact.addEventListener('click', () => {
+    slide.classList.add('app-mode');
+    slideTitle.textContent = '';
+    slideMeta.textContent = '';
+
+    slideDesc.innerHTML = `
+      <div class="app-page">
+        <div class="contact-form">
+          <h2>Kontaktformular</h2>
+          <label for="contactName">Ihr Name:</label>
+          <input type="text" id="contactName" placeholder="Name eingeben">
+
+          <label for="contactMsg">Ihre Nachricht:</label>
+          <textarea id="contactMsg" placeholder="Nachricht eingeben"></textarea>
+
+                  <div class="app-row">
+          <button class="tool-btn app-tile" id="sendMailBtn" type="button" title="Nachricht senden">
+            <span class="tool-icon">📨</span>
+            <span class="label" style="display:none">Senden</span>
+          </button>
+          <div class="app-desc">
+            <span class="title">Senden</span>
+            <span>Schickt die Nachricht an Herr Müller.</span>
+          </div>
+        </div>
+
+        </div>
+      </div>
+    `;
+
+    // Klick-Event für "Senden"
+    const sendBtn = document.getElementById('sendMailBtn');
+    if (sendBtn) {
+      sendBtn.addEventListener('click', () => {
+        const name = document.getElementById('contactName').value.trim();
+        const msg  = document.getElementById('contactMsg').value.trim();
+
+        const subject = encodeURIComponent("Anfrage vom Kunden");
+        const body    = encodeURIComponent("Name: " + name + "\n\nNachricht:\n" + msg);
+
+        // Deine Zieladresse hier eintragen:
+        window.location.href = "mailto:horst.mueller-architekt@mein.gmx?subject=" + subject + "&body=" + body;
+      });
+    }
+  });
+}
+
+// === Links-Button Event ===
+const btnLinks = document.getElementById('appOpenLinks');
+if (btnLinks) {
+  btnLinks.addEventListener('click', () => {
+    slide.classList.add('app-mode');
+    slideTitle.textContent = '';
+    slideMeta.textContent = '';
+
+    // Inhalt für die Links-Seite
+    slideDesc.innerHTML = `
+      <div class="app-page">
+        <div class="app-grid">
+          <div class="app-list">
+
+            <!-- Beispiel-Link 1 -->
+            <div class="app-row">
+              <button class="tool-btn app-tile" type="button" title="Architektur Vorlagen"
+                onclick="window.open('https://example.com/architektur', '_blank')">
+                <span class="tool-icon">📐</span>
+                <span class="label" style="display:none">Architektur</span>
+              </button>
+              <div class="app-desc">
+                <span class="title">Architektur-Vorlagen</span>
+                <span>Externe Seite mit Entwürfen und Zeichnungen.</span>
+              </div>
+            </div>
+
+            <!-- Beispiel-Link 2 -->
+            <div class="app-row">
+              <button class="tool-btn app-tile" type="button" title="Baustoffe"
+                onclick="window.open('https://example.com/baustoffe', '_blank')">
+                <span class="tool-icon">🏗️</span>
+                <span class="label" style="display:none">Baustoffe</span>
+              </button>
+              <div class="app-desc">
+                <span class="title">Baustoffe</span>
+                <span>Hilfreiche Website zu Materialien.</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+  
+
+  // Aktionen verdrahten (nutzt vorhandene Funktionen)
+  document.getElementById('appOpenGallery')?.addEventListener('click', ()=> openLightbox(1));
+  document.getElementById('appPlayVideo')?.addEventListener('click', openContextVideo);
+  document.getElementById('appServerLoad')?.addEventListener('click', ()=> fetchCentralHotspots(true));
+  document.getElementById('appExport')?.addEventListener('click', exportHotspots);
+  document.getElementById('appShare')?.addEventListener('click', async ()=>{
+    try{ await navigator.clipboard.writeText(location.href); alert('Link kopiert!'); }
+    catch{ prompt('Kopiere den Link:', location.href); }
+  });
+}
+
+
+
+        // Links-Buttons (Start + Slide) an App-Page binden
+        // (Start-Toolbar hat .slide-tools--mini, Slide unten normale .slide-tools)
+        document.querySelectorAll('.linksBtn').forEach(btn=>{
+        btn.addEventListener('click', openLinksAppPage);
+        });
 
     // ===== Hintergrund ermitteln (ohne fetch, server- & file-Modus tauglich) =====
     function tryLoadImageSequential(urls, onOk, onFail){
@@ -1653,70 +2304,90 @@ backBtn.addEventListener("click", function(e){
     function setNavVisible(v){ nextBgBtn.style.display = v ? 'inline-block' : 'none'; }
 
     // ===== Neue Folie (Slide) =====
-    function openSlide(h){
-      const id = slugify(h.id||'');
-      lastAreaSlug = id; // <- NEU: Bereich merken
+    // ===== Neue Folie (Slide) =====
+function openSlide(h){
+  // UI zurücksetzen
+  slide.classList.remove('app-mode');
+  if (slideImg) slideImg.style.display = '';
+  const id = slugify(h.id||'');
+  lastAreaSlug = id; // Bereich merken
 
-      // Inhalte aus Code
-      const c = contents[id];
-      slideTitle.textContent = c?.title || h.id || id;
-      slideDesc.innerHTML = c?.html || `<p>Für den Bereich <strong>${h.id}</strong> ist noch kein Inhalt hinterlegt.</p>`;
+  // Inhalte aus Code
+  const c = contents[id];
+  slideTitle.textContent = c?.title || h.id || id;
+  slideDesc.innerHTML = c?.html || `<p>Für den Bereich <strong>${h.id}</strong> ist noch kein Inhalt hinterlegt.</p>`;
 
-      // Reset Galerie-Status
-      gallery.slug = null; gallery.index = 1; gallery.cache = new Map(); gallery.hasAny = false; setNavVisible(false);
+  // Reset Galerie-Status
+  gallery.slug = null; gallery.index = 1; gallery.cache = new Map(); gallery.hasAny = false; setNavVisible(false);
 
-      // Hintergrund: erst bereichsspezifisch, sonst gezoomtes Hausbild
-      tryLoadImageSequential(backgroundCandidates(id), async (url)=>{
-        // eigenes Bild nur im Bildbereich
-        slideImg.src = url; 
-        slideImg.style.transform = 'none';
-        slideMeta.textContent = 'Bild 1';
-        slide.classList.add('slide--contain');
-        slide.classList.add('open'); // NEU: Slide sichtbar machen
+  // Hintergrund: erst bereichsspezifisch, sonst gezoomtes Hausbild
+  tryLoadImageSequential(backgroundCandidates(id), async (url)=>{
+    // eigenes Bild nur im Bildbereich
+    slideImg.src = url; 
+    slideImg.style.transform = 'none';
+    slideMeta.textContent = 'Bild 1';
+    slide.classList.add('slide--contain');
+    slide.classList.add('open'); // Slide sichtbar
+    // Button nach dem Öffnen der Slide bauen (Erfolgsfall)
+    requestAnimationFrame(() => {  try { buildTutorialButtonForSlide(); } catch (e) { console.warn(e); }});  //tut Button fix
 
-
-        // Galerie aktivieren
-        gallery.slug = id; gallery.index = 1; gallery.cache.set(1, url); gallery.hasAny = true; setNavVisible(true);
-      }, ()=>{
-        // Fallback auf Hausbild + Zoom
-        const baseSrc = document.getElementById('baseImage').src;
-        slideImg.src = baseSrc;
-        const cx = h.points.reduce((a,p)=>a+p.x,0)/h.points.length;
-        const cy = h.points.reduce((a,p)=>a+p.y,0)/h.points.length;
-        const s = Math.max(1, zoom);
-        const maxShift = 100 - (100/s);
-        const tx = clamp(cx - 50/s, 0, Math.max(0, maxShift));
-        const ty = clamp(cy - 50/s, 0, Math.max(0, maxShift));
-        slideImg.style.transformOrigin = 'top left';
-        slideImg.style.transform = `translate(-${tx}%, -${ty}%) scale(${s})`;
-        slideMeta.textContent = `Zoom ${s.toFixed(1)}×`;
-        slide.classList.add('open');
-        slide.classList.remove('slide--contain');   // <--- NEU
+    // Galerie aktivieren
+    gallery.slug = id; gallery.index = 1; gallery.cache.set(1, url); gallery.hasAny = true; setNavVisible(true);
+    // Tutorial-Button bauen
+    requestAnimationFrame(()=>{ 
+    try { 
+        buildTutorialButtonForSlide(); 
+    } catch(e) {console.warn(e); 
+    } 
+});
 
 
-        // Keine Galerie verfügbar
-        setNavVisible(false);
-      });
+  }, ()=>{
+    // Fallback auf Hausbild + Zoom
+    const baseSrc = document.getElementById('baseImage').src;
+    slideImg.src = baseSrc;
+    const cx = h.points.reduce((a,p)=>a+p.x,0)/h.points.length;
+    const cy = h.points.reduce((a,p)=>a+p.y,0)/h.points.length;
+    const s = Math.max(1, zoom);
+    const maxShift = 100 - (100/s);
+    const tx = clamp(cx - 50/s, 0, Math.max(0, maxShift));
+    const ty = clamp(cy - 50/s, 0, Math.max(0, maxShift));
+    slideImg.style.transformOrigin = 'top left';
+    slideImg.style.transform = `translate(-${tx}%, -${ty}%) scale(${s})`;
+    slideMeta.textContent = `Zoom ${s.toFixed(1)}×`;
+    slide.classList.add('open');
+    slide.classList.remove('slide--contain');
 
-      // Klasse für bereichsspezifische Styles
-      slide.classList.forEach(c=>{ if(c.startsWith('area--')) slide.classList.remove(c); });
-      slide.classList.add(`area--${id}`);
-    }
+    setNavVisible(false);
 
-    function closeSlide(){
-       // Slide schließen
-       slide.classList.remove('open');
+    // NEU: auch im Fallback den Button nach dem Öffnen bauen
+    requestAnimationFrame(()=>{ try{ buildTutorialButtonForSlide(); }catch(e){ console.warn(e); } });
+  });
+
+  // Klasse für bereichsspezifische Styles
+  slide.classList.forEach(c=>{ if(c.startsWith('area--')) slide.classList.remove(c); });
+  slide.classList.add(`area--${id}`);
+
+  // Optional: Bereichs-Tutorial automatisch (einmal pro Bereich)
+  if (typeof startAreaTutorialOnce === 'function') {
+    setTimeout(()=> startAreaTutorialOnce(id), 300);
+  }
+}
+
+
+   function closeSlide(){
+      slide.classList.remove('open');
+      slide.classList.remove('app-mode'); // << NEU
       slideImg.style.transform = 'none';
-
       }
 
       // Vorherige Listener sicher entfernen & Lightbox öffnen
-    nextBgBtn.replaceWith(nextBgBtn.cloneNode(true));
-const nextBgBtnNew = document.getElementById('nextBgBtn');
-nextBgBtn = nextBgBtnNew;   // <<< NEU: Referenz aktualisieren!
-nextBgBtn.addEventListener('click', ()=> {
-  openLightbox(1);
-});
+            nextBgBtn.replaceWith(nextBgBtn.cloneNode(true));
+             const nextBgBtnNew = document.getElementById('nextBgBtn');
+             nextBgBtn = nextBgBtnNew;   // <<< NEU: Referenz aktualisieren!
+             nextBgBtn.addEventListener('click', ()=> {
+          openLightbox(1);
+        });
 
 // ===== Lightbox / Slideshow =====
 const lb = document.getElementById('lightbox');
@@ -2068,7 +2739,14 @@ lb.addEventListener('click', (e)=>{
         if(!Array.isArray(json.hotspots)) { if(showAlerts) alert('Ungültige Datei: Feld "hotspots" fehlt.'); return; }
         hotspots = json.hotspots;
         saveHotspots();
-        if(typeof json.zoom === 'number'){ zoom = json.zoom; saveZoom(); if(zoomSlider){ zoomSlider.value = String(zoom); zoomOut.textContent = `${zoom.toFixed(1)}×`; } }
+        if (typeof json.zoom === 'number') {
+          zoom = json.zoom;
+          const zs = document.getElementById('zoomSlider');
+          const zo = document.getElementById('zoomOut');
+          if (zs) zs.value = String(zoom);
+          if (zo) zo.textContent = `${zoom.toFixed(1)}×`;
+          saveZoom();
+        }
         refreshHotspotSelect();
         renderHotspots();
         if(showAlerts) alert('Hotspots vom Server geladen.');
@@ -2097,7 +2775,14 @@ lb.addEventListener('click', (e)=>{
           if(!Array.isArray(json.hotspots)) { alert('Ungültige Datei: "hotspots" fehlt.'); return; }
           hotspots = json.hotspots;
           saveHotspots();
-          if(typeof json.zoom === 'number'){ zoom = json.zoom; saveZoom(); if(zoomSlider){ zoomSlider.value = String(zoom); zoomOut.textContent = `${zoom.toFixed(1)}×`; } }
+            if (typeof json.zoom === 'number') {
+              zoom = json.zoom;
+              const zs = document.getElementById('zoomSlider');
+              const zo = document.getElementById('zoomOut');
+              if (zs) zs.value = String(zoom);
+              if (zo) zo.textContent = `${zoom.toFixed(1)}×`;
+              saveZoom();
+            }
           refreshHotspotSelect();
           renderHotspots();
           alert('Hotspots importiert.');
@@ -2109,7 +2794,12 @@ lb.addEventListener('click', (e)=>{
     // ===== Events für zentrale Daten =====
     serverLoadBtn.addEventListener('click', ()=> fetchCentralHotspots(true));
     exportBtn.addEventListener('click', ()=> exportHotspots());
-    importFile.addEventListener('change', (e)=>{ const f = e.target.files?.[0]; if(f) handleImportFile(f); e.target.value=''; });
+    importFile.addEventListener('change', (e)=>{ 
+  const f = e.target.files?.[0]; 
+  if (f) handleImportFile(f); 
+  e.target.value = ''; 
+    });
+
 
     // ===== Init =====
     (function init(){
@@ -2158,6 +2848,8 @@ function setupRoleHandlers(){
     sessionStorage.setItem('is_admin','false');
     applyAdminUI();
     await fetchCentralHotspots(false);   // immer Serverstand laden
+      // NEU: Tutorial starten
+    startStudentTutorial();
     closeRoleModal();
   });
 
@@ -2167,6 +2859,7 @@ function setupRoleHandlers(){
       isAdmin = true;
       sessionStorage.setItem('is_admin','true');
       applyAdminUI();
+      
       // Optional: Als Lehrer NICHT automatisch Server laden, damit lokale Edits bleiben:
       // Wenn du trotzdem sofort den Serverstand laden willst, hier entkommentieren:
       // fetchCentralHotspots(true);
@@ -2178,6 +2871,297 @@ function setupRoleHandlers(){
 }
 
     })();
+// === Browser-Button Event ===
+document.addEventListener("DOMContentLoaded", function() {
+  const btnBrowser = document.getElementById("appOpenBrowser");
+  if (btnBrowser) {
+    btnBrowser.addEventListener("click", function() {
+      const url = "https://www.google.com/" // <-- Ziel-URL eintragen
+      const confirmLeave = confirm("Achtung: Sie verlassen die App und öffnen eine externe Website. Fortfahren?");
+      if (confirmLeave) {
+        window.open(url, "_blank");
+      }
+    });
+  }
+});
+
+// === Tutorial (immer für Schüler, 2 Schritte) ===
+(function(){
+  const overlay = document.getElementById('tutOverlay');
+  const focus   = document.getElementById('tutFocus');
+  const arrow   = document.getElementById('tutArrow');
+  const tip     = document.getElementById('tutTip');
+  const tipText = document.getElementById('tutText');
+  const btnSkip = document.getElementById('tutSkip');
+  const btnNext = document.getElementById('tutNext');
+
+  let steps = [];
+  let stepIdx = 0;
+  let relayoutBound = null;
+
+  function placeAt(targetEl){
+    if (!targetEl) return;
+    const r = targetEl.getBoundingClientRect();
+    const sx = window.scrollX, sy = window.scrollY;
+    // Fokusrahmen
+    focus.style.cssText = `display:block; left:${r.left - 8 + sx}px; top:${r.top - 8 + sy}px; width:${r.width + 16}px; height:${r.height + 16}px;`;
+    // Pfeil oberhalb, zentriert
+    arrow.style.cssText = `display:block; left:${r.left + r.width/2 - 17 + sx}px; top:${Math.max(8, r.top - 40) + sy}px;`;
+    // Tooltip rechts vom Ziel (wenn zu wenig Platz: darunter)
+    const viewW = document.documentElement.clientWidth;
+    const tipLeftPref = r.right + 12 + sx;
+    const tipLeft = (tipLeftPref + 300 < sx + viewW) ? tipLeftPref : (r.left + sx);
+    const tipTop  = (tipLeft === tipLeftPref) ? (r.top + sy - 4) : (r.bottom + 12 + sy);
+    tip.style.cssText = `display:block; left:${tipLeft}px; top:${tipTop}px;`;
+  }
+
+  function showStep(i){
+    stepIdx = i;
+    const s = steps[stepIdx];
+    if (!s || !s.el) { endTutorial(); return; }
+    tipText.textContent = s.text;
+    overlay.style.display = 'block';
+    focus.style.display   = 'block';
+    arrow.style.display   = 'block';
+    tip.style.display     = 'block';
+    // Reposition bei Resize/Scroll
+    if (!relayoutBound){
+      relayoutBound = ()=> placeAt(s.el);
+      window.addEventListener('resize', relayoutBound);
+      window.addEventListener('scroll', relayoutBound, { passive:true });
+    }
+    placeAt(s.el);
+  }
+
+  function endTutorial(){
+    overlay.style.display = 'none';
+    focus.style.display   = 'none';
+    arrow.style.display   = 'none';
+    tip.style.display     = 'none';
+    if (relayoutBound){
+      window.removeEventListener('resize', relayoutBound);
+      window.removeEventListener('scroll', relayoutBound);
+      relayoutBound = null;
+    }
+  }
+
+  btnSkip.addEventListener('click', endTutorial);
+  overlay.addEventListener('click', endTutorial);
+
+  btnNext.addEventListener('click', ()=>{
+    const next = stepIdx + 1;
+    if (next >= steps.length){ endTutorial(); return; }
+    showStep(next);
+  });
+
+  // Öffentlich machen: Startfunktion
+  window.startStudentTutorial = function(){
+    // Schritt-Ziele (Video-Button, dann Info-Button). Falls die Home-Infoleiste existiert, nimm diese vorrangig.
+    const videoBtn = document.querySelector('.introBtn');
+    const infoBtn  = document.querySelector('.home-tools .linksBtn')
+                      || document.querySelector('#slide .linksBtn')
+                      || document.querySelector('.linksBtn');
+
+    steps = [
+      { el: videoBtn, text: 'Schau dir die Lernsituation (Video) an.' },
+      { el: infoBtn,  text: 'Unter dem i findest du wichtige Informationen und Weiterleitungen.' }
+    ].filter(s => !!s.el); // falls Element nicht da ist, Schritt überspringen
+
+    if (steps.length === 0){ return; }
+    // Kleines Delay, falls Layout/Animation gerade läuft
+    setTimeout(()=> showStep(0), 200);
+  };
+})();
+
+// === Bereichs-/Polygon-Tutorial: einmal pro Bereich (Slug) — ERSETZT ===
+(function(){
+  const LS_KEY_PREFIX = 'area_tut_seen_';
+
+  // nutzt deine vorhandenen Layer
+  const overlay = document.getElementById('tutOverlay');
+  const focus   = document.getElementById('tutFocus');
+  const arrow   = document.getElementById('tutArrow');
+  const tip     = document.getElementById('tutTip');
+  const tipText = document.getElementById('tutText');
+  let btnSkip = document.getElementById('tutSkip');
+  let btnNext = document.getElementById('tutNext');
+
+  let currentEl = null;
+  let relayoutBound = null;
+
+  function placeAt(el){
+    if (!el) return;
+    const r  = el.getBoundingClientRect();
+    const sx = window.scrollX, sy = window.scrollY;
+
+    // Fokusrahmen direkt um das Ziel
+    focus.style.cssText =
+      `display:block; left:${r.left-8+sx}px; top:${r.top-8+sy}px; width:${r.width+16}px; height:${r.height+16}px;`;
+    // Pfeil oberhalb mittig
+    arrow.style.cssText =
+      `display:block; left:${r.left + r.width/2 - 17 + sx}px; top:${Math.max(8, r.top - 40) + sy}px;`;
+
+    // Tooltip rechts vom Ziel, bei Platzmangel darunter
+    const vw = document.documentElement.clientWidth;
+    const rightPref = r.right + 12 + sx;
+    const tipLeft   = (rightPref + 320 < sx + vw) ? rightPref : (r.left + sx);
+    const tipTop    = (tipLeft === rightPref) ? (r.top + sy - 4) : (r.bottom + 12 + sy);
+
+    tip.style.cssText = `display:block; left:${tipLeft}px; top:${tipTop}px;`;
+
+    overlay.style.display = 'block';
+    focus.style.display   = 'block';
+    arrow.style.display   = 'block';
+    tip.style.display     = 'block';
+  }
+
+  function hideAll(){
+    overlay.style.display = 'none';
+    focus.style.display   = 'none';
+    arrow.style.display   = 'none';
+    tip.style.display     = 'none';
+    if (relayoutBound){
+      window.removeEventListener('resize', relayoutBound);
+      window.removeEventListener('scroll',  relayoutBound);
+      relayoutBound = null;
+    }
+  }
+
+  window.startAreaTutorialOnce = function(slug){
+    const key = (slug ? LS_KEY_PREFIX + slug : LS_KEY_PREFIX + 'default');
+    if (localStorage.getItem(key)) return; // nur einmal pro Bereich
+    // Alte Listener vom Schüler-Tutorial abkoppeln:
+        btnNext.replaceWith(btnNext.cloneNode(true));
+        btnSkip.replaceWith(btnSkip.cloneNode(true));
+        // Refs aktualisieren
+        btnNext = document.getElementById('tutNext');
+        btnSkip = document.getElementById('tutSkip');
+
+    // ---- Ziel-Elemente in Reihenfolge LINKS → RECHTS ----
+    const stepDefs = [
+      { el: document.getElementById('backBtn'),
+        text: 'Home-Button – kehrt zum Startbildschirm zurück.' },
+
+      { el: document.getElementById('nextBgBtn'),
+        text: 'Bilder – enthält Bilder des Projektbereichs.' },
+
+      { el: document.querySelector('#slide .introBtn'),
+        text: 'Video – enthält Videos zum Projektbereich.' },
+
+      { el: document.querySelector('#slide .linksBtn'),
+        text: 'Info-Button – hier findest du wichtige Informationen & Weiterleitungen.' },
+
+      // Fokus auf den grünen Infobereich / Projektbeschreibung
+      { el: document.querySelector('#slideDesc .info-card')
+            || document.querySelector('#slideDesc .info-content')
+            || document.getElementById('slideDesc'),
+        text: 'Projektbeschreibung – hier stehen die wichtigsten Inhalte zum Bereich.' }
+    ].filter(s => !!s.el);
+
+    if (stepDefs.length === 0) return;
+
+    let step = 0;
+
+    const showStep = (i)=>{
+      step = i;
+      const target = stepDefs[step].el;
+      tipText.textContent = stepDefs[step].text;
+      placeAt(target);
+
+      if (!relayoutBound){
+        relayoutBound = ()=> placeAt(stepDefs[step].el);
+        window.addEventListener('resize', relayoutBound);
+        window.addEventListener('scroll',  relayoutBound, { passive:true });
+      } else {
+        // beim Schrittwechsel neu binden, damit der Pfeil dem neuen Ziel folgt
+        window.removeEventListener('resize', relayoutBound);
+        window.removeEventListener('scroll',  relayoutBound);
+        relayoutBound = ()=> placeAt(stepDefs[step].el);
+        window.addEventListener('resize', relayoutBound);
+        window.addEventListener('scroll',  relayoutBound, { passive:true });
+      }
+    };
+
+    const finish = ()=>{ hideAll(); localStorage.setItem(key,'1'); };
+
+    btnSkip.onclick = finish;
+    overlay.onclick = finish;
+    btnNext.onclick = ()=>{
+      const next = step + 1;
+      if (next >= stepDefs.length) finish();
+      else showStep(next);
+    };
+
+    // kleines Delay, falls die Slide gerade animiert
+    setTimeout(()=> showStep(0), 200);
+  };
+})();
+// === NEU: Minimaler Tutorial-Button (oben links, nur auf "normalen" Slides) ===
+(function(){
+  function isNormalSlide(slideEl){
+    if (!slideEl) return false;
+    const isVideo = slideEl.matches('[data-page-type="video"], .slide--video')
+                 || !!slideEl.querySelector('video, iframe[src*="youtube"], iframe[src*="vimeo"]');
+    const isInfo  = slideEl.matches('[data-page-type="info"], .slide--info')
+                 || !!slideEl.querySelector('.info, .info-page');
+    return !(isVideo || isInfo);
+  }
+
+  function startAreaTutorialManual(slug){
+    // Falls dein "Once"-Flow benutzt wird, gesehen-Flag entfernen
+    try { localStorage.removeItem('area_tut_seen_' + (slug || 'default')); } catch(e){}
+    if (typeof window.startAreaTutorialOnce === 'function') {
+      window.startAreaTutorialOnce(slug);
+    }
+  }
+
+  window.buildTutorialButtonForSlide = function(){
+        const slide = document.getElementById('slide');
+      // slug optional; wenn leer, startet das Default-Tutorial
+      const slug  = (typeof window.lastAreaSlug === 'string') ? window.lastAreaSlug : '';
+      
+      if (!slide) { document.getElementById('areaTutBtn')?.remove(); return; }
+      // KEIN isNormalSlide-Check, KEIN Pflicht-slug
+
+
+    // Anker sicherstellen (#areaTutFloat existiert bereits in deinem HTML/CSS)
+    let anchor = document.getElementById('areaTutFloat');
+    if (!anchor) {
+      anchor = document.createElement('div');
+      anchor.id = 'areaTutFloat';
+      slide.appendChild(anchor);
+    }
+
+    // Button (Style .tool-btn, Icon: rotes Fragezeichen, Label "Tutorial")
+    let btn = document.getElementById('areaTutBtn');
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.id = 'areaTutBtn';
+      btn.type = 'button';
+      btn.className = 'tool-btn';
+      btn.title = 'Bereichs-Tutorial starten';
+      btn.innerHTML = '<span class="tool-icon">❓</span><span class="label">Tutorial</span>';
+    } else {
+      btn.classList.add('tool-btn');
+      (btn.querySelector('.tool-icon') || btn.firstElementChild)?.classList.add('tool-icon');
+    }
+
+    // alte Listener durch Klonen entfernen, dann Klick binden
+    const fresh = btn.cloneNode(true);
+    fresh.addEventListener('click', (e)=>{
+      e.preventDefault();
+      startAreaTutorialManual(slug);
+    });
+
+    // einhängen
+    if (btn.parentElement !== anchor) anchor.appendChild(fresh);
+    else btn.replaceWith(fresh);
+  };
+})();
+
+
   </script>
+  
+
 </body>
 </html>
