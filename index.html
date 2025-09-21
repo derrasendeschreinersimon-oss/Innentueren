@@ -1148,7 +1148,6 @@ let videoOrigin = null;
   "og": "" // leer => „Coming Soon“
 };
 
-
     // Assets
     const assetsBaseInput = document.getElementById('assetsBase');
     const assetsBaseBtn = document.getElementById('saveAssetsBase');
@@ -1178,6 +1177,32 @@ let videoOrigin = null;
     const saveEditBtn = document.getElementById('saveEditBtn');
     const cancelEditBtn = document.getElementById('cancelEditBtn');
     const deleteBtn = document.getElementById('deleteBtn');
+
+          // --- Intro/Hintergrund Status ---
+      const INTRO_SEEN_KEY = 'intro_seen_v1';
+      const baseImageEl = document.getElementById('baseImage');
+
+      // Passe ggf. die Dateinamen/Endungen an:
+      const HOME_BG_DEFAULT = 'haus.png';
+      const HOME_BG_AFTER_CANDIDATES = ['haus_after.png', 'haus_after.webp', 'haus_after.jpg'];
+
+      function setHomeBgDefault(){
+        if (baseImageEl) baseImageEl.src = HOME_BG_DEFAULT;
+      }
+      function setHomeBgAfter(){
+        if (!baseImageEl) return;
+        // Nimm die erste existierende Datei (png/webp/jpg)
+        let i = 0;
+        const img = new Image();
+        const next = ()=>{
+          if (i >= HOME_BG_AFTER_CANDIDATES.length) return;
+          const url = HOME_BG_AFTER_CANDIDATES[i++];
+          img.onload = ()=>{ baseImageEl.src = url; };
+          img.onerror = next;
+          img.src = url;
+        };
+        next();
+      }
 
     // Slide elements
     const slide = document.getElementById('slide');
@@ -1234,6 +1259,19 @@ function cleanupVideo(){
   // Medien stoppen
   slideDesc.querySelectorAll("video").forEach(v=>{ try{ v.pause(); }catch(e){} });
   slideDesc.querySelectorAll("iframe").forEach(f=>{ try{ f.src = f.src; }catch(e){} });
+  // Falls Intro von der Startseite lief und schon weit genug geschaut wurde:
+  try{
+    if (introPlaybackFromHome && currentVideoEl && currentVideoEl.duration){
+      const ratio = currentVideoEl.currentTime / currentVideoEl.duration;
+      if (ratio >= 0.85) {
+        localStorage.setItem(INTRO_SEEN_KEY,'1');
+        introSeen = true;
+        setHomeBgAfter();
+      }
+    }
+  }catch(e){/* ignore */}
+  introPlaybackFromHome = false;
+  currentVideoEl = null;
 
   // Inhalt zurücksetzen
   restoreDesc();
@@ -1295,6 +1333,33 @@ function openContextVideo(){
         <video src="${src}" controls playsinline preload="metadata"></video>
       </div>
     `;
+          const v = slideDesc.querySelector('video');
+      currentVideoEl = v;
+      introPlaybackFromHome = (videoOrigin === VIDEO_FROM_HOME);
+
+      // Helper: einmalig markieren + Bild tauschen
+      function markIntroWatched(){
+        if (introSeen) return;
+        introSeen = true;
+        localStorage.setItem(INTRO_SEEN_KEY,'1'); // <— vereinheitlicht
+        setHomeBgAfter();
+        }
+
+
+      // 1) „echtes“ Ende
+      v.addEventListener('ended', ()=>{ if (introPlaybackFromHome) markIntroWatched(); }, { once:true });
+
+      // 2) Falls früh geschlossen: ab 85 % als „gesehen“ werten
+      let flagged = false;
+      v.addEventListener('timeupdate', function onTU(){
+        if (flagged || !introPlaybackFromHome) return;
+        if (v.duration && v.currentTime / v.duration >= 0.85){
+          flagged = true;
+          v.removeEventListener('timeupdate', onTU);
+          markIntroWatched();
+  }
+});
+
   }
 }
 
@@ -1317,10 +1382,11 @@ backBtn.addEventListener("click", function(e){
     // Video kam von der Startseite:
     // 1) Videomodus aufräumen
     cleanupVideo();
+    localStorage.setItem(INTRO_SEEN_KEY,'1');
+    setHomeBgAfter();
     videoOrigin = null;
-    // 2) NICHT verhindern -> bestehende Logik schließt die Slide (zur Startseite)
     return;
-  }
+    }
 
   // Video kam aus einer Bereichs-Slide:
   // NICHT zur Startseite springen, nur Videomodus beenden
@@ -2050,6 +2116,7 @@ lb.addEventListener('click', (e)=>{
       applyAdminUI();
       refreshHotspotSelect();
       renderHotspots();
+      setHomeBgDefault(); // setzt immer 'haus.png' beim Laden
       setupRoleHandlers();
       openRoleModal();
 
