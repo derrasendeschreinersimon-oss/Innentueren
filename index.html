@@ -985,7 +985,8 @@ if (window.visualViewport){
                 html: `
                   <section class="info-card">
                     <header>
-                      <h2>Situation 1 – Der Schlafbereich</h2>
+                       <p><h3>Situation 1 – Der abtrennbare Schlafbereich &nbsp;&nbsp;&nbsp; <h3></p>
+                        <p><h2>Anforderungsbereich &nbsp;&nbsp;&nbsp; ⭐⭐⭐ </p> </h2>
                     </header>
 
                     <div class="info-content">
@@ -1016,7 +1017,8 @@ if (window.visualViewport){
                 html: `
                   <section class="info-card">
                     <header>
-                      <h2>Situation 2 – Die Bibliothek </h2>
+                      <p><h3>Situation 2 – Die Bibliothek &nbsp;&nbsp;&nbsp; <h3></p>
+                        <p><h2>Anforderungsbereich &nbsp;&nbsp;&nbsp; ⭐ </p> </h2>
                     </header>
 
                     <div class="info-content">
@@ -1046,7 +1048,8 @@ if (window.visualViewport){
                 html: `
                   <section class="info-card">
                     <header>
-                      <h2>Situation 3 – Der Saunaumbau </h2>
+                        <p><h3>Situation 3 – Der Saunaumbau  <h3></p>
+                        <p><h2>Anforderungsbereich &nbsp;&nbsp;&nbsp; ⭐⭐ </p> </h2>
                     </header>
 
                     <div class="info-content">
@@ -1076,11 +1079,13 @@ if (window.visualViewport){
                 html: `
                   <section class="info-card">
                     <header>
-                      <h2>Situation 4 – Türmontage im Kellerraum</h2>
+                      <p><h3>Situation 4 – Türmontage im Keller  <h3></p>
+                      <p><h2>Anforderungsbereich &nbsp;&nbsp;&nbsp; ⭐⭐⭐⭐ </p> </h2>
                     </header>
 
                     <div class="info-content">
                       <p>
+                        Das wird der UB -> Einzelsituation mit allen Schülern evtl mini Stationenarbeit
                       </p>
                       <p>
                       </p>
@@ -2085,7 +2090,7 @@ function setupRoleHandlers(){
     isAdmin = false;
     sessionStorage.setItem('is_admin','false');
     applyAdminUI();
-    await fetchCentralHotspots(true);   // immer Serverstand laden
+    await fetchCentralHotspots(false);   // immer Serverstand laden
     closeRoleModal();
   });
 
