@@ -202,10 +202,14 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
 /* Slide: Content-Höhe auf Mobile angenehmer, ohne Scroll-Hölle */
 .slide { height: 100svh; } /* sicheres Viewport-Height auf iOS/Android */
 .slide-content { max-height: 100svh; }
-@media (max-width: 860px){
-  .slide-content { max-height: calc(100svh - var(--tools-h) - var(--safe-bottom) - var(--tools-gap)); }
-
-}
+ @media (max-width: 860px){
+   /* Obere Bildzeile bekommt ein Minimum,
+      rechte Content-Spalte rechnet dieses Minimum heraus */
+   .slide{ grid-template-rows: minmax(var(--bg-min, 32svh), 1fr) auto; }
+   .slide-content {
+     max-height: calc(100svh - var(--bg-min, 32svh) - var(--tools-h) - var(--safe-bottom) - var(--tools-gap));
+   }
+ }
 
 
 
@@ -613,7 +617,8 @@ html.no-scroll, body.no-scroll { overflow: hidden !important; }
 :root{
   --tools-h: 60px;                    /* Default – wird per JS live gemessen */
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --tools-gap: 10px;                  /* kleiner Luftspalt über der Leiste */
+  --tools-gap: 10px;      
+  --bg-min: 32svh;     /* Mindesthöhe für die Bildzeile auf Phones */            /* kleiner Luftspalt über der Leiste */
 }
 
 /* Nur wenn Slide offen und NICHT im Video-Modus: unten Platz lassen */
