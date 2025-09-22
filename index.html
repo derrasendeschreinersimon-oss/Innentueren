@@ -1010,14 +1010,23 @@ padding: 16px !important; /* dezente Luft */
   .home-tools .label{ display: none; }
 }
 /* Zentrale Werkzeugleiste auf der Startseite */
-.home-center-tools{
-  position: absolute;
-  left: 50%;
-   bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
-   transform: translateX(-50%);
-  z-index: 3;             /* über Bild/Overlay */
-  pointer-events: none;   /* nur innerer Container klickbar */
+.home-center-tools {
+  position: fixed;          /* fixiert die Leiste an einer Position */
+  left: 50%;               /* horizontal zentriert */
+  bottom: 0;               /* am unteren Viewport-Rand */
+  transform: translateX(-50%);  /* genaue Zentrierung */
+  z-index: 10;             /* über dem Hintergrundbild */
+  background: rgba(15, 19, 48, 0.9); /* ggf. Hintergrundfarbe für bessere Lesbarkeit */
+  padding: 10px 16px;      /* Abstand innen */
+  border-top-left-radius: 12px;  /* optionale Abrundung */
+  border-top-right-radius: 12px; /* optionale Abrundung */
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.5); /* leichter Schatten */
+
+  .wrap {
+  padding-bottom: 70px; /* Platz für Leiste */
 }
+}
+
 
 .home-center-tools .slide-tools-inner{
   pointer-events: auto;
@@ -1049,6 +1058,16 @@ padding: 16px !important; /* dezente Luft */
 .tut-arrow{ position:absolute; width:34px; height:34px; z-index:10000; display:none; animation:tutBlink 1s ease-in-out infinite; }
 .tut-arrow::before{ content:"⬇️"; font-size:28px; display:block; }
 @keyframes tutBlink{ 0%,100%{ transform:translateY(0); opacity:.9; } 50%{ transform:translateY(6px); opacity:.3; } }
+
+#tutTip {
+  width: 320px;         /* feste Mindestbreite */
+  max-width: 90vw;      /* maximal 90% der Viewport-Breite */
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
 
 
   </style>
