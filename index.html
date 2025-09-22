@@ -201,7 +201,7 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
 
 /* Slide: Content-Höhe auf Mobile angenehmer, ohne Scroll-Hölle */
 .slide { height: 100svh; } /* sicheres Viewport-Height auf iOS/Android */
-.slide-content { max-height: 45svh; }
+.slide-content { max-height: 100vh; }
 @media (max-width: 860px){
   .slide-content { max-height: 50svh; }
 }
@@ -438,6 +438,19 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
   width: 100%;
   height: 100%;
   border: 0;
+}
+.slide-content.no-info {
+  display: grid;
+  grid-template-columns: 1fr !important; /* Info-Bereich fehlt, Inhalt nimmt volle Breite */
+}
+
+.slide-content .info-card {
+  display: block; /* Standard sichtbar */
+}
+
+/* Sicherstellen, dass die info-card bei 'display:none' komplett ausgeblendet ist */
+.slide-content .info-card[style*="display: none"] {
+  display: none !important;
 }
 
 .coming-soon {
@@ -702,6 +715,11 @@ inset 0 3px 4px rgba(0,0,0,0.25),
 transform: translateY(1px);
 }
 
+#slide {
+  height: 100vh; /* Fallback */
+  height: calc(var(--vh, 1vh) * 100); /* Dynamisch */
+}
+
 /* === App-Page Modus (für die Info-Seite) === */
 #slide.app-mode .slide-bg{ display:none !important; }
 #slide.app-mode .slide-content{
@@ -843,7 +861,8 @@ padding: 16px !important; /* dezente Luft */
 #areaTutFloat {
   position: absolute;
   top: 12px;
-  left: 120px;
+  left: auto;
+  right: calc(env(safe-area-inset-right, 0px) + 12px);
   z-index: 1000;
   pointer-events: none; /* Container nimmt keine Klicks */
 }
@@ -851,6 +870,28 @@ padding: 16px !important; /* dezente Luft */
 #areaTutFloat > .tool-btn {
   pointer-events: auto; /* nur der Button selbst klickbar */
 }
+
+/* --- Tutorial-Button kleiner skalieren --- */
+#areaTutBtn{
+  /* Button insgesamt kompakter: */
+  padding: 6px 8px;        /* vorher 10px 12px aus .tool-btn */
+  gap: 6px;                /* weniger Abstand zwischen Icon & Label */
+  font-size: clamp(12px, 2.2vw, 14px); /* etwas kleinere Grundschrift */
+}
+#areaTutBtn .tool-icon{
+  /* Das runde Icon etwas kleiner: */
+  font-size: 1.6em;        /* vorher 2em */
+  width: 1.8em;            /* vorher 2.2em */
+  height: 1.8em;           /* vorher 2.2em */
+}
+
+/* Wenn der Button in einer slide-tools-inner-Pill liegt: Container auch schlanker */
+#areaTutFloat .slide-tools-inner{
+  gap: 8px;                /* vorher 10px */
+  padding: 4px 6px;        /* vorher 6px 8px */
+  border-radius: 12px;     /* vorher 14px, etwas enger */
+}
+
 
 
 
@@ -968,6 +1009,26 @@ padding: 16px !important; /* dezente Luft */
 @media (max-width: 420px){
   .home-tools .label{ display: none; }
 }
+/* Zentrale Werkzeugleiste auf der Startseite */
+.home-center-tools{
+  position: absolute;
+  left: 50%;
+   bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+   transform: translateX(-50%);
+  z-index: 3;             /* über Bild/Overlay */
+  pointer-events: none;   /* nur innerer Container klickbar */
+}
+
+.home-center-tools .slide-tools-inner{
+  pointer-events: auto;
+  /* der Look kommt bereits aus .slide-tools-inner (Glas/Pill) */
+}
+
+/* Falls sehr wenig Höhe: etwas nach unten versetzen */
+@media (max-height: 560px){
+  .home-center-tools{ top: 55%; }
+}
+
 
 /* Tutorial: Overlay + Fokus + Tooltip */
 .tut-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:9998; display:none; }
@@ -1014,19 +1075,34 @@ padding: 16px !important; /* dezente Luft */
       <img id="baseImage" src="haus.png" alt="Abbildung eines Hauses" />
       <svg class="overlay" id="overlay" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
           <!-- NEU: Home-Infobar oben rechts im Bild -->
-        <div class="home-tools" aria-label="Infoleiste">
-      <div class="slide-tools-inner">
-        <button class="linksBtn tool-btn" type="button" title="Infopage öffnen">
-          <span class="tool-icon">
-            <!-- nutzt deine bereits gestylte rote i-Scheibe -->
-            <span class="i3d" aria-hidden="true"></span>
-          </span>
-          <span class="label">Info</span>
-        </button>
-      </div>
-    </div>
+       <!-- Home: zentrale Werkzeugleiste (Info + Introvideo) -->
+<div class="home-center-tools" aria-label="Start-Werkzeuge">
+  <div class="slide-tools-inner">
+    <!-- Intro-Video -->
+    <button class="introBtn tool-btn" type="button" title="Einstiegsvideo ansehen">
+      <span class="tool-icon">🎬</span>
+      <span class="label">Video</span>
+    </button>
 
+    <!-- Info -->
+    <button class="linksBtn tool-btn" type="button" title="Infopage öffnen">
+      <span class="tool-icon">
+        <span class="i3d" aria-hidden="true"></span>
+      </span>
+      <span class="label">Info</span>
+    </button>
+
+       <!-- Tutorial -->
+      <button id="homeTutBtn" class="tool-btn" type="button" title="Kurzes Tutorial starten">
+        <span class="tool-icon">❓</span>
+        <span class="label">Tutorial</span>
+      </button>
+  </div>
+
+     
     </div>
+</div>
+
 
     <div class="toolbar">
 
@@ -1039,15 +1115,6 @@ padding: 16px !important; /* dezente Luft */
           </select>
         </label>
 
-                  <!-- Mini-Werkzeugleiste in der Start-Toolbar -->
-      <div class="slide-tools slide-tools--mini">
-        <div class="slide-tools-inner">
-        <button class="introBtn tool-btn" type="button" title="Einstiegsvideo ansehen">
-        <span class="tool-icon">🎬</span>
-        <span class="label">Video</span>
-        </button>
-        </div>
-      </div>
 
       <label class="admin-only inline"><input type="file" id="imgPicker" accept="image/*" />Eigenes Bild laden</label>
       <button id="toggleLabels" type="button" class="admin-only inline" aria-pressed="false">Labels an/aus</button>
@@ -1290,6 +1357,22 @@ function updateToolsHeight(){
   const h = Math.ceil(tools.getBoundingClientRect().height);
   document.documentElement.style.setProperty('--tools-h', h + 'px');
 }
+function updateHomeSlideHeight() {
+  const homeSlide = document.getElementById('slide'); // Startseiten-Slide ID
+  if (!homeSlide) return;
+
+  // Berechnung der vh Einheit, um Browser-spezifische Viewport-Höhen zu berücksichtigen
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+
+  // Höhe des Startseiten-Slides an Viewport anpassen (über CSS Variable)
+  homeSlide.style.height = `calc(var(--vh, 1vh) * 100)`;
+}
+
+// Event-Listener hinzufügen zum Anpassen bei Fenstergröße und Orientierung
+window.addEventListener('resize', updateHomeSlideHeight);
+window.addEventListener('orientationchange', updateHomeSlideHeight);
+window.addEventListener('load', updateHomeSlideHeight);
 
 // beim Laden + Fenster-/Viewport-Änderungen updaten
 window.addEventListener('load', updateToolsHeight);
@@ -1726,6 +1809,14 @@ document.querySelectorAll(".introBtn").forEach(btn=>{
   btn.addEventListener("click", openContextVideo);
 });
 
+// Tutorial (Startseite): Schüler-Tutorial starten
+document.getElementById('homeTutBtn')?.addEventListener('click', ()=>{
+  if (typeof window.startStudentTutorial === 'function') {
+    window.startStudentTutorial();
+  }
+});
+
+
 // Back-Button: Video- oder App-Modus korrekt verlassen
 backBtn.addEventListener("click", function(e){
   const inVideo = slide.classList.contains("video-mode");
@@ -1988,6 +2079,16 @@ function openLinksAppPage(){
   // Herkunft bestimmen: Slide noch zu? -> Startseite, sonst aktueller Bereich
   const openedFromHome = !slide.classList.contains('open');
   appOrigin = openedFromHome ? APP_FROM_HOME : (lastAreaSlug || APP_FROM_HOME);
+  const infoCard = document.querySelector('.slide-content .info-card');
+  if (infoCard) {
+    if (!infoCard.innerText.trim()) {
+      infoCard.style.display = 'none'; // Versteckt den leeren Info-Bereich
+      document.querySelector('.slide-content').classList.add('no-info'); // Layout-Klasse hinzufügen
+    } else {
+      infoCard.style.display = ''; // Zeigt den Info-Bereich an
+      document.querySelector('.slide-content').classList.remove('no-info');
+    }
+  }
 
   // Slide öffnen & App-Modus aktivieren
   slide.classList.add('open');
@@ -2909,10 +3010,45 @@ document.addEventListener("DOMContentLoaded", function() {
     arrow.style.cssText = `display:block; left:${r.left + r.width/2 - 17 + sx}px; top:${Math.max(8, r.top - 40) + sy}px;`;
     // Tooltip rechts vom Ziel (wenn zu wenig Platz: darunter)
     const viewW = document.documentElement.clientWidth;
-    const tipLeftPref = r.right + 12 + sx;
-    const tipLeft = (tipLeftPref + 300 < sx + viewW) ? tipLeftPref : (r.left + sx);
-    const tipTop  = (tipLeft === tipLeftPref) ? (r.top + sy - 4) : (r.bottom + 12 + sy);
-    tip.style.cssText = `display:block; left:${tipLeft}px; top:${tipTop}px;`;
+      const viewH = document.documentElement.clientHeight;
+      const maxTipWidth = 320;
+      const maxTipHeight = 120;
+
+      const tipLeftPref = r.right + 12 + sx;
+      const tipLeft = (tipLeftPref + maxTipWidth > viewW + sx) ? (r.left - maxTipWidth - 12 + sx) : tipLeftPref;
+
+// Standard Position des Tooltip neben Button auf gleicher Höhe
+let tipTop = r.top - maxTipHeight - 12 + sy;
+if (tipTop < sy + 8) {
+  tipTop = sy + 8;
+}
+
+
+// Prüfe, ob Tooltip über das untere Ende des Bildschirms hinausgeht
+const outOfBottom = tipTop + maxTipHeight > viewH + sy;
+if (outOfBottom) {
+  // Zeige Tooltip oberhalb des Buttons, falls unten zu wenig Platz
+  tipTop = Math.max(sy + 8, r.bottom - maxTipHeight + sy);
+}
+
+// Verhindere, dass Tooltip zu hoch (aus dem Viewport) oben sitzt
+if (tipTop < sy + 8) {
+  tipTop = sy + 8;
+}
+
+
+if (outOfBottom) {
+  // Zeige Tooltip oberhalb des Buttons, falls unten zu wenig Platz
+  tipTop = Math.max(sy + 8, r.bottom - maxTipHeight + sy);
+}
+
+// Verhindere, dass Tooltip zu hoch (aus dem Viewport) oben sitzt
+if (tipTop < sy + 8) {
+  tipTop = sy + 8;
+}
+
+tip.style.cssText = `display:block; left:${tipLeft}px; top:${tipTop}px; max-width:${maxTipWidth}px;`;
+
   }
 
   function showStep(i){
@@ -2955,22 +3091,91 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   // Öffentlich machen: Startfunktion
-  window.startStudentTutorial = function(){
-    // Schritt-Ziele (Video-Button, dann Info-Button). Falls die Home-Infoleiste existiert, nimm diese vorrangig.
-    const videoBtn = document.querySelector('.introBtn');
-    const infoBtn  = document.querySelector('.home-tools .linksBtn')
-                      || document.querySelector('#slide .linksBtn')
-                      || document.querySelector('.linksBtn');
-
-    steps = [
-      { el: videoBtn, text: 'Schau dir die Lernsituation (Video) an.' },
-      { el: infoBtn,  text: 'Unter dem i findest du wichtige Informationen und Weiterleitungen.' }
-    ].filter(s => !!s.el); // falls Element nicht da ist, Schritt überspringen
-
-    if (steps.length === 0){ return; }
-    // Kleines Delay, falls Layout/Animation gerade läuft
-    setTimeout(()=> showStep(0), 200);
+window.startStudentTutorial = function() {
+  // Wilkommensnachricht als erster Tutorial-Schritt
+  const welcomeStep = {
+    el: null,
+    text: `
+      <h2>Willkommen beim Projekt Stadtvilla Müller</h2>
+      <p>Sie befinden sich im Tutorial.</p>
+    `,
+    html: true, // falls HTML erlaubt ist im Tutorial-Renderer
   };
+
+  // Tutorial-Schritte: zuerst welcomeStep, dann weitere Schritte
+  let steps = [
+    welcomeStep,
+    // ... hier müssen die weiteren einzelnen Schritte folgen, z.B. Video-Button, Info-Button usw.
+    { el: document.querySelector(".introBtn"), text: "Schau dir das Lernsituation Video an." },
+    { el: document.querySelector(".linksBtn"), text: "Unter dem i findest du wichtige Informationen und Weiterleitungen." },
+    { el: document.getElementById("homeTutBtn"), text: "Mit diesem Button startest du jederzeit dieses Tutorial neu." }
+  ];
+
+  let stepIdx = 0;
+  let overlay = document.getElementById("tutOverlay");
+  let focus = document.getElementById("tutFocus");
+  let arrow = document.getElementById("tutArrow");
+  let tip = document.getElementById("tutTip");
+  let tipText = document.getElementById("tutText");
+  let btnSkip = document.getElementById("tutSkip");
+  let btnNext = document.getElementById("tutNext");
+
+  function showStep(i) {
+    if (i >= steps.length) {
+      // Tutorial Ende
+      overlay.style.display = "none";
+      focus.style.display = "none";
+      arrow.style.display = "none";
+      tip.style.display = "none";
+      return;
+    }
+    let step = steps[i];
+    tipText.innerHTML = step.html ? step.text : (step.text || "");
+
+    if (step.el) {
+      // Positioniere Tooltip/Fokus auf Ziel
+      const rect = step.el.getBoundingClientRect();
+      focus.style.display = "block";
+      focus.style.left = rect.left - 8 + window.scrollX + "px";
+      focus.style.top = rect.top - 8 + window.scrollY + "px";
+      focus.style.width = rect.width + 16 + "px";
+      focus.style.height = rect.height + 16 + "px";
+
+      arrow.style.display = "block";
+      arrow.style.left = (rect.left + rect.width / 2 - 17) + window.scrollX + "px";
+      arrow.style.top = Math.max(8, rect.top - 40) + window.scrollY + "px";
+
+      tip.style.display = "block";
+      tip.style.left = (rect.right + 12) + window.scrollX + "px";
+      tip.style.top = Math.max(8, rect.top - 120) + window.scrollY + "px";
+    } else {
+      // Wilkommenstext z.B. mittig anzeigen, Fokus ausblenden
+      focus.style.display = "none";
+      arrow.style.display = "none";
+      tip.style.display = "block";
+      tip.style.left = "50%";
+      tip.style.top = "40%";
+      tip.style.transform = "translate(-50%, -50%)";
+    }
+    overlay.style.display = "block";
+    stepIdx = i;
+  }
+
+  btnNext.onclick = function() {
+    showStep(stepIdx + 1);
+  };
+
+  btnSkip.onclick = function() {
+    overlay.style.display = "none";
+    focus.style.display = "none";
+    arrow.style.display = "none";
+    tip.style.display = "none";
+  };
+
+  // Tutorial starten mit Wilkommensschritt
+  showStep(0);
+};
+
 })();
 
 // === Bereichs-/Polygon-Tutorial: einmal pro Bereich (Slug) — ERSETZT ===
@@ -3005,7 +3210,15 @@ document.addEventListener("DOMContentLoaded", function() {
     const vw = document.documentElement.clientWidth;
     const rightPref = r.right + 12 + sx;
     const tipLeft   = (rightPref + 320 < sx + vw) ? rightPref : (r.left + sx);
-    const tipTop    = (tipLeft === rightPref) ? (r.top + sy - 4) : (r.bottom + 12 + sy);
+    // Tooltip immer oberhalb des Buttons anzeigen
+      const maxTipHeight = 120;
+      let tipTop = r.top - maxTipHeight - 12 + sy;
+
+      // Falls nicht genug Platz nach oben, am oberen Rand des Viewports halten
+      if (tipTop < sy + 8) {
+        tipTop = sy + 8;
+      }
+
 
     tip.style.cssText = `display:block; left:${tipLeft}px; top:${tipTop}px;`;
 
@@ -3131,9 +3344,17 @@ document.addEventListener("DOMContentLoaded", function() {
       anchor.id = 'areaTutFloat';
       slide.appendChild(anchor);
     }
+    // Innerer Container mit Werkzeughintergrund (wie die Leiste unten)
+    let inner = anchor.querySelector('.slide-tools-inner');
+    if (!inner) {
+      inner = document.createElement('div');
+      inner.className = 'slide-tools-inner';
+      anchor.appendChild(inner);
+    }
+
 
     // Button (Style .tool-btn, Icon: rotes Fragezeichen, Label "Tutorial")
-    let btn = document.getElementById('areaTutBtn');
+    let btn = inner.querySelector('#areaTutBtn');
     if (!btn) {
       btn = document.createElement('button');
       btn.id = 'areaTutBtn';
@@ -3154,7 +3375,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // einhängen
-    if (btn.parentElement !== anchor) anchor.appendChild(fresh);
+    if (btn.parentElement !== inner) inner.appendChild(fresh);  
     else btn.replaceWith(fresh);
   };
 })();
