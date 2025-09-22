@@ -201,9 +201,10 @@ html { font-size: clamp(14px, 1.6vw, 16px); }
 
 /* Slide: Content-Höhe auf Mobile angenehmer, ohne Scroll-Hölle */
 .slide { height: 100svh; } /* sicheres Viewport-Height auf iOS/Android */
-.slide-content { max-height: 100vh; }
+.slide-content { max-height: 100svh; }
 @media (max-width: 860px){
-  .slide-content { max-height: 50svh; }
+  .slide-content { max-height: calc(100svh - var(--tools-h) - var(--safe-bottom) - var(--tools-gap)); }
+
 }
 
 
@@ -726,6 +727,8 @@ transform: translateY(1px);
 background: transparent !important; /* kein Panel-Hintergrund */
 border-left: 0 !important; /* Rahmen weg (Desktop) */
 padding: 16px !important; /* dezente Luft */
+max-height: none !important;
+
 }
 /* === APP-MODUS: nur Back-Button oben links, keine untere Toolbar === */
 #slide.app-mode .slide-tools {
