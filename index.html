@@ -3215,31 +3215,45 @@ window.startStudentTutorial = function() {
 
   function placeAt(el){
     if (!el) return;
-    const r  = el.getBoundingClientRect();
-    const sx = window.scrollX, sy = window.scrollY;
 
-    // Fokusrahmen direkt um das Ziel
-    focus.style.cssText =
-      `display:block; left:${r.left-8+sx}px; top:${r.top-8+sy}px; width:${r.width+16}px; height:${r.height+16}px;`;
-    // Pfeil oberhalb mittig
-    arrow.style.cssText =
-      `display:block; left:${r.left + r.width/2 - 17 + sx}px; top:${Math.max(8, r.top - 40) + sy}px;`;
+  const r = el.getBoundingClientRect();
+  const sx = window.scrollX, sy = window.scrollY;
 
-    // Tooltip rechts vom Ziel, bei Platzmangel darunter
-    const vw = document.documentElement.clientWidth;
-    const rightPref = r.right + 12 + sx;
-    const tipLeft   = (rightPref + 320 < sx + vw) ? rightPref : (r.left + sx);
-    // Tooltip immer oberhalb des Buttons anzeigen
-      const maxTipHeight = 120;
-      let tipTop = r.top - maxTipHeight - 12 + sy;
+  // Fokusrahmen
+  focus.style.cssText = `display:block; left:${r.left - 8 + sx}px; top:${r.top - 8 + sy}px; width:${r.width + 16}px; height:${r.height + 16}px;`;
 
-      // Falls nicht genug Platz nach oben, am oberen Rand des Viewports halten
-      if (tipTop < sy + 8) {
-        tipTop = sy + 8;
-      }
+  // Pfeil mittig oberhalb 
+  arrow.style.cssText = `display:block; left:${r.left + r.width / 2 - 17 + sx}px; top:${Math.max(8, r.top - 40) + sy}px;`;
 
+  // Tooltip rechts vom Ziel, wenn Platz vorhanden, sonst links daneben
+  const vw = document.documentElement.clientWidth;
+  const maxTipWidth = 320;
 
-    tip.style.cssText = `display:block; left:${tipLeft}px; top:${tipTop}px;`;
+  // Standard rechts daneben
+  let tipLeftPreferred = r.right + 12 + sx;
+  // Prüfen ob rechts genug Platz (Tooltipbreite + etwas Buffer)
+  let tipLeft;
+  if (tipLeftPreferred + maxTipWidth > vw + sx) {
+    // Falls nicht genug Platz rechts, links daneben positionieren
+    tipLeft = r.left - maxTipWidth - 12 + sx;
+    if (tipLeft < sx) {
+      // Falls links auch nicht genug Platz, fixiere an den rechten Rand des Bildschirms (maximale Verschiebung)
+      tipLeft = vw + sx - maxTipWidth - 8;
+    }
+  } else {
+    tipLeft = tipLeftPreferred;
+  }
+
+  // Berechnung der Vertikalposition (Tooltip oberhalb des Buttons)
+  const maxTipHeight = 120;
+  let tipTop = r.top - maxTipHeight - 12 + sy;
+  if (tipTop < sy + 8) {
+    // Falls zu hoch oben, unten am Button positionieren
+    tipTop = r.bottom + 12 + sy;
+  }
+
+  tip.style.cssText = `display:block; left:${tipLeft}px; top:${tipTop}px; max-width:${maxTipWidth}px;`;
+
 
     overlay.style.display = 'block';
     focus.style.display   = 'block';
