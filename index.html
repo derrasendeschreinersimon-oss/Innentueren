@@ -1068,6 +1068,24 @@ padding: 16px !important; /* dezente Luft */
   hyphens: auto;
 }
 
+.red-info-card {
+  background: rgba(255, 136, 0, 0.581);      /* leicht roter Hintergrund */
+  border: 1px solid #e54c4c;              /* roter Rand, ähnlich wie grün */
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 10px 0 14px;                    /* analog zu info-card, aber ggf. unten mehr */
+  box-sizing: border-box;
+  width: 100%;                            /* nimmt volle Breite wie .info-card */
+  display: block;                         /* sicherstellen, dass es wie Blockelement behandelt wird */
+}
+
+
+.info-illustration {
+  display: flex;
+  gap: 10px; /* Abstand zwischen den Bildern */
+  align-items: center; /* optional: vertikal ausrichten */
+}
+
 
 
   </style>
@@ -1424,7 +1442,7 @@ if (window.visualViewport){
       try{ const k='__t'; localStorage.setItem(k,'1'); localStorage.removeItem(k); return true; }catch{ return false; }
     }
     function qs(name){ const u=new URL(location.href); return u.searchParams.get(name); }
-
+    
     // ===== Inhalte (nur im Code) =====
     const contents = {
               eg: {
@@ -1454,6 +1472,7 @@ if (window.visualViewport){
 
                     <aside class="info-illustration">
                       <img src="assets/ui/handwerker.png" alt="Illustration: Handwerker">
+                      <img src="assets/ui/Larissa.png" alt="Illustration: Larissa">
                     </aside>
                   </section>
                 `
@@ -1486,6 +1505,8 @@ if (window.visualViewport){
 
                     <aside class="info-illustration">
                       <img src="assets/ui/handwerker.png" alt="Illustration: Handwerker">
+                                            <img src="assets/ui/Larissa.png" alt="Illustration: Larissa">
+
                     </aside>
                   </section>
                 `
@@ -1517,6 +1538,8 @@ if (window.visualViewport){
 
                     <aside class="info-illustration">
                       <img src="assets/ui/handwerker.png" alt="Illustration: Handwerker">
+                                            <img src="assets/ui/Larissa.png" alt="Illustration: Larissa">
+
                     </aside>
                   </section>
                 `
@@ -1546,6 +1569,8 @@ if (window.visualViewport){
 
                     <aside class="info-illustration">
                       <img src="assets/ui/handwerker.png" alt="Illustration: Handwerker">
+                       <img src="assets/ui/Larissa.png" alt="Illustration: Larissa">
+
                     </aside>
                   </section>
                 `
@@ -1553,6 +1578,99 @@ if (window.visualViewport){
       
       // weitere Bereiche hier ergänzen: fenster: {...}, tuer: {...}, fassade: {...}
     };
+
+      const auftraege = {
+  eg: {
+    html: `
+           <section>
+  <header>
+    <h3>Arbeitsaufträge – Bauabschnitt</h3>
+  </header>
+  <div>
+    <ul style="line-height: 1.8;">
+      <li>Macht euch mit eurem <strong>Bauabschnitt</strong> vertraut → prüft, welche <strong>Themenbereiche</strong> dafür relevant sind ("info-page" nutzen).</li>
+      <li>Überlegt, welche <strong>Unterlagen</strong> notwendig sind, um den Auftrag erfolgreich zu lösen.</li>
+      <li>Bezieht dabei die drei <strong>Bereiche</strong> ein:</li>
+      <ul style="line-height: 1.8; margin-top: 0.5em; margin-bottom: 0.5em;">
+        <li><strong>Gestaltung &amp; Konstruktion</strong></li>
+        <li><strong>Planung &amp; Fertigung</strong></li>
+        <li><strong>Montage &amp; Service</strong></li>
+      </ul>
+      <li>Falls ihr <strong>zusätzliche Infos</strong> benötigt → kontaktiert <strong>Herrn Müller</strong> per Mail und stellt ihm eure Fragen ("info-page" beachten).</li>
+      <li>Erstellt im Team einen <strong>Advanced Organizer</strong> für euren Bauabschnitt → seid <strong>kreativ</strong> und achtet auf eine klare Struktur.</li>
+    </ul>
+  </div>
+</section>`
+  },
+  og: {
+    html: `
+           <section>
+  <header>
+    <h3>Arbeitsaufträge – Bauabschnitt</h3>
+  </header>
+  <div>
+    <ul style="line-height: 1.8;">
+      <li>Macht euch mit eurem <strong>Bauabschnitt</strong> vertraut → prüft, welche <strong>Themenbereiche</strong> dafür relevant sind ("info-page" nutzen).</li>
+      <li>Überlegt, welche <strong>Unterlagen</strong> notwendig sind, um den Auftrag erfolgreich zu lösen.</li>
+      <li>Bezieht dabei die drei <strong>Bereiche</strong> ein:</li>
+      <ul style="line-height: 1.8; margin-top: 0.5em; margin-bottom: 0.5em;">
+        <li><strong>Gestaltung &amp; Konstruktion</strong></li>
+        <li><strong>Planung &amp; Fertigung</strong></li>
+        <li><strong>Montage &amp; Service</strong></li>
+      </ul>
+      <li>Falls ihr <strong>zusätzliche Infos</strong> benötigt → kontaktiert <strong>Herrn Müller</strong> per Mail und stellt ihm eure Fragen ("info-page" beachten).</li>
+      <li>Erstellt im Team einen <strong>Advanced Organizer</strong> für euren Bauabschnitt → seid <strong>kreativ</strong> und achtet auf eine klare Struktur.</li>
+    </ul>
+  </div>
+</section>`
+  },
+  pool: {
+    html: `
+     <section>
+  <header>
+    <h3>Arbeitsaufträge – Bauabschnitt</h3>
+  </header>
+  <div>
+    <ul style="line-height: 1.8;">
+      <li>Macht euch mit eurem <strong>Bauabschnitt</strong> vertraut → prüft, welche <strong>Themenbereiche</strong> dafür relevant sind ("info-page" nutzen).</li>
+      <li>Überlegt, welche <strong>Unterlagen</strong> notwendig sind, um den Auftrag erfolgreich zu lösen.</li>
+      <li>Bezieht dabei die drei <strong>Bereiche</strong> ein:</li>
+      <ul style="line-height: 1.8; margin-top: 0.5em; margin-bottom: 0.5em;">
+        <li><strong>Gestaltung &amp; Konstruktion</strong></li>
+        <li><strong>Planung &amp; Fertigung</strong></li>
+        <li><strong>Montage &amp; Service</strong></li>
+      </ul>
+      <li>Falls ihr <strong>zusätzliche Infos</strong> benötigt → kontaktiert <strong>Herrn Müller</strong> per Mail und stellt ihm eure Fragen ("info-page" beachten).</li>
+      <li>Erstellt im Team einen <strong>Advanced Organizer</strong> für euren Bauabschnitt → seid <strong>kreativ</strong> und achtet auf eine klare Struktur.</li>
+    </ul>
+  </div>
+</section>`
+
+  },
+  keller: {
+    html: `
+           <section>
+  <header>
+    <h3>Arbeitsaufträge – Bauabschnitt</h3>
+  </header>
+  <div>
+    <ul style="line-height: 1.8;">
+      <li>Macht euch mit eurem <strong>Bauabschnitt</strong> vertraut → prüft, welche <strong>Themenbereiche</strong> dafür relevant sind ("info-page" nutzen).</li>
+      <li>Überlegt, welche <strong>Unterlagen</strong> notwendig sind, um den Auftrag erfolgreich zu lösen.</li>
+      <li>Bezieht dabei die drei <strong>Bereiche</strong> ein:</li>
+      <ul style="line-height: 1.8; margin-top: 0.5em; margin-bottom: 0.5em;">
+        <li><strong>Gestaltung &amp; Konstruktion</strong></li>
+        <li><strong>Planung &amp; Fertigung</strong></li>
+        <li><strong>Montage &amp; Service</strong></li>
+      </ul>
+      <li>Falls ihr <strong>zusätzliche Infos</strong> benötigt → kontaktiert <strong>Herrn Müller</strong> per Mail und stellt ihm eure Fragen ("info-page" beachten).</li>
+      <li>Erstellt im Team einen <strong>Advanced Organizer</strong> für euren Bauabschnitt → seid <strong>kreativ</strong> und achtet auf eine klare Struktur.</li>
+    </ul>
+  </div>
+</section>`
+  }
+};
+
 
     // ===== Persistente Schlüssel =====
     const LS_KEYS = { hotspots: 'hotspots_v1', zoom: 'zoom_v1', assets: 'assets_base_v1' };
@@ -1662,7 +1780,7 @@ if (window.visualViewport){
     const slideMeta = document.getElementById('slideMeta');
     const backBtn = document.getElementById('backBtn');
     let nextBgBtn = document.getElementById('nextBgBtn');
-
+    
     // === VIDEO: Hilfsfunktionen ===
 function toYouTubeEmbed(url){
   try{
@@ -2166,8 +2284,8 @@ function openLinksAppPage(){
                 <span class="label" style="display:none">Links</span>
               </button>
               <div class="app-desc">
-                <span class="title">Hilfreiche Websites</span>
-                <span></span>
+                <span class="title">Hilfreiche Websites </span>
+                <span>Aktuell keine Funktion <strong>coming soon</strong></span>
               </div>
             </div>
 
@@ -2222,37 +2340,161 @@ if (btnNotes) {
 
             <!-- Platzhalter 1 -->
             <div class="app-row">
-              <button class="tool-btn app-tile app-tile--disabled" type="button" title="Platzhalter">
-                <span class="tool-icon">⬜</span>
+              <button class="tool-btn app-tile app-tile--disabled" type="button" title="Maße">
+                <span class="tool-icon">📏</span>
                 <span class="label" style="display:none">Maßgebung im Hochbau</span>
               </button>
               <div class="app-desc">
-                <span class="title">Platzhalter</span>
-                <span>Maßordnung im Hochbau.</span>
+                <span class="title">Maße</span>
+                <span><ul style="line-height: 1.8;">
+                     <li>Maßordnung im Hochbau</li>
+         <li>Mauerwerksmaße</li>
+      <li>Aufmaß im Rohbau</li>
+      <li>Standard Türmaße</li>
+      <li>Dornmaß, Entfernung und Co.</li>
+      <li>Spezialtürmaße</li>
+    </ul></span>
               </div>
             </div>
 
             <!-- Platzhalter 2 -->
             <div class="app-row">
               <button class="tool-btn app-tile app-tile--disabled" type="button" title="Platzhalter">
-                <span class="tool-icon">⬜</span>
+                <span class="tool-icon">🪵</span>
                 <span class="label" style="display:none">Platzhalter</span>
               </button>
               <div class="app-desc">
-                <span class="title">Platzhalter</span>
-                <span>Weitere Kachel als Platzhalter für kommende Inhalte.</span>
+                <span class="title">Materialien</span>
+                <span><ul style="line-height: 1.8;">
+      <li>Dämm-, Dicht- und Sperrstoffe</li>
+      <li>Mauerwerk</li>
+      <li>Befestigungsmittel</li>
+      <li>Türblattarten (Aufbau)</li>
+      <li>Trockenbau-Material</li>
+    </ul></span>
               </div>
             </div>
 
-            <!-- Platzhalter 3 -->
+            <!-- Platzhalter 4 -->
             <div class="app-row">
               <button class="tool-btn app-tile app-tile--disabled" type="button" title="Platzhalter">
-                <span class="tool-icon">⬜</span>
+                <span class="tool-icon">🚪</span>
                 <span class="label" style="display:none">Platzhalter</span>
               </button>
               <div class="app-desc">
-                <span class="title">Platzhalter</span>
-                <span>Noch eine Kachel für zukünftige Funktionen.</span>
+                <span class="title">Innentüren</span>
+                <span><ul style="line-height: 1.8;">
+  <li>Tür Konstruktionsarten</li>
+  <li>Standardtüren</li>
+  <li>Türblätter (Gestaltung)</li>
+  <li>Türzargen</li>
+</ul></span>
+              </div>
+            </div>
+            <!-- Platzhalter 5 -->
+            <div class="app-row">
+              <button class="tool-btn app-tile app-tile--disabled" type="button" title="Platzhalter">
+                <span class="tool-icon">🔑</span>
+                <span class="label" style="display:none">Platzhalter</span>
+              </button>
+              <div class="app-desc">
+                <span class="title">Beschläge</span>
+                <span><ul style="line-height: 1.8;">
+  <li>Beschläge (Bänder)</li>
+  <li>Schlösser</li>
+  <li>Spezialbeschläge</li>
+  <li>Deckenbeschläge</li>
+  <li>Wandbeschläge</li>
+</ul></span>
+              </div>
+            </div>
+            <!-- Platzhalter 6 -->
+            <div class="app-row">
+              <button class="tool-btn app-tile app-tile--disabled" type="button" title="Platzhalter">
+                <span class="tool-icon">🛡️</span>
+                <span class="label" style="display:none">Platzhalter</span>
+              </button>
+              <div class="app-desc">
+                <span class="title">Schutzarten</span>
+                <span><ul style="line-height: 1.8;">
+  <li>Wärmeschutz</li>
+  <li>Schallschutz</li>
+  <li>Brandschutz</li>
+</ul></span>
+              </div>
+            </div>
+
+            <!-- Platzhalter 7 -->
+            <div class="app-row">
+              <button class="tool-btn app-tile app-tile--disabled" type="button" title="Platzhalter">
+                <span class="tool-icon">🚪🚪</span>
+                <span class="label" style="display:none">Platzhalter</span>
+              </button>
+              <div class="app-desc">
+                <span class="title">Spezialtüren</span>
+                <span><ul style="line-height: 1.8;">
+  <li>Schiebetüren</li>
+  <li>Falttüren</li>
+  <li>Schallschutztüren</li>
+    <li>Strahlenschutztüren</li>
+  <li>Einbruchschutztüren</li>
+    <li>Glastüren</li>
+      <li>Pendeltüren</li>
+</ul></span>
+              </div>
+            </div>
+
+               <!-- Platzhalter 8 -->
+            <div class="app-row">
+              <button class="tool-btn app-tile app-tile--disabled" type="button" title="Platzhalter">
+                <span class="tool-icon">📦</span>
+                <span class="label" style="display:none">Platzhalter</span>
+              </button>
+              <div class="app-desc">
+                <span class="title">Raumtrennende Elemente</span>
+                <span><ul style="line-height: 1.8;">
+  <li>Schrankwände</li>
+  <li>Gerippewände</li>
+  <li>Elementwände</li>
+  <li>Glastrennwände</li>
+  <li>Wandschränke</li>
+  <li>Raumteiler</li>
+</ul></span>
+              </div>
+            </div>
+
+               <!-- Platzhalter 9 -->
+            <div class="app-row">
+              <button class="tool-btn app-tile app-tile--disabled" type="button" title="Platzhalter">
+                <span class="tool-icon">🧱</span>
+                <span class="label" style="display:none">Platzhalter</span>
+              </button>
+              <div class="app-desc">
+                <span class="title">Raumumfassende Elemente</span>
+                <span><ul style="line-height: 1.8;">
+  <li>Bauarten von Wandverkleidungen</li>
+  <li>Bauarten von Deckenverkleidungen</li>
+  <li>Befestigung</li>
+  <li>Akustikdecken</li>
+  <li>Lüftungsdecken</li>
+</ul></span>
+              </div>
+            </div>
+            <!-- Platzhalter 3 -->
+            <div class="app-row">
+              <button class="tool-btn app-tile app-tile--disabled" type="button" title="Platzhalter">
+                <span class="tool-icon">🛠️</span>
+                <span class="label" style="display:none">Platzhalter</span>
+              </button>
+              <div class="app-desc">
+                <span class="title">Montage</span>
+                <span><ul style="line-height: 1.8;">
+  <li>Türmontage</li>
+  <li>Deckenmontage</li>
+  <li>Montage von Wandverkleidungen</li>
+  <li>Erstellen von Trennwänden</li>
+  <li>Montage von Schrankwänden</li>
+</ul></span>
               </div>
             </div>
 
@@ -2423,7 +2665,8 @@ if (btnLinks) {
     }
     function setNavVisible(v){ nextBgBtn.style.display = v ? 'inline-block' : 'none'; }
 
-    // ===== Neue Folie (Slide) =====
+
+
     // ===== Neue Folie (Slide) =====
 function openSlide(h){
   // UI zurücksetzen
@@ -2436,6 +2679,14 @@ function openSlide(h){
   const c = contents[id];
   slideTitle.textContent = c?.title || h.id || id;
   slideDesc.innerHTML = c?.html || `<p>Für den Bereich <strong>${h.id}</strong> ist noch kein Inhalt hinterlegt.</p>`;
+  document.querySelectorAll('.slide-content .info-card').forEach(greenCard => {
+  if (!greenCard.nextElementSibling || !greenCard.nextElementSibling.classList.contains('red-info-card')) {
+    const redCard = document.createElement('div');
+    redCard.className = 'red-info-card';
+    redCard.innerHTML = auftraege[id]?.html || '<p>Keine Arbeitsaufträge definiert.</p>';
+    greenCard.parentNode.insertBefore(redCard, greenCard.nextSibling);
+  }
+});
 
   // Reset Galerie-Status
   gallery.slug = null; gallery.index = 1; gallery.cache = new Map(); gallery.hasAny = false; setNavVisible(false);
