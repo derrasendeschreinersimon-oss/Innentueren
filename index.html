@@ -1137,6 +1137,12 @@ max-height: none !important;
       <span class="label">Info</span>
     </button>
 
+        <!-- Neu Button ergänzen -->
+    <button id="btnNeu" class="tool-btn" type="button" title="Änderungen anzeigen">
+      <span class="tool-icon">🆕</span>
+      <span class="label">Neu</span>
+    </button>
+
        <!-- Tutorial -->
       <button id="homeTutBtn" class="tool-btn" type="button" title="Kurzes Tutorial starten">
         <span class="tool-icon">❓</span>
@@ -1144,6 +1150,10 @@ max-height: none !important;
       </button>
   </div>
 
+  <div id="changeLog" class="info-card" style="display:none; max-height: 30vh; overflow-y: auto; margin-top: 1em; background: rgba(18, 7, 231, 0.542); border: 1px solid #7aa2ff; border-radius: 12px; padding: 16px;">
+    <h2 id="changeLogHeader">Änderungen</h2>
+    <ul id="changeLogList" style="margin: 0; padding-left: 20px; color: #f6f6f6;"></ul>
+  </div>
      
     </div>
 </div>
@@ -1216,7 +1226,7 @@ max-height: none !important;
   <section class="slide" id="slide" aria-live="polite" aria-modal="true" role="dialog">
     <div class="slide-bg">
       <img id="slideImg" alt="Bereichsbild" />
-        </div>
+              </div>
       <div class="slide-tools" aria-label="Werkzeugleiste">
         <div class="slide-tools-inner">
               <button id="backBtn" class="tool-btn" aria-label="Zurück">
@@ -1247,6 +1257,8 @@ max-height: none !important;
       <h2 id="slideTitle">Titel</h2>
       <div id="slideDesc">Beschreibung</div>
     </article>
+    
+
   </section>
   <!-- Rollen-Dialog -->
   <div id="roleModal" class="role-modal" aria-modal="true" role="dialog">
@@ -2612,7 +2624,7 @@ if (btnLinks) {
   });
 }
 
-  
+ 
 
   // Aktionen verdrahten (nutzt vorhandene Funktionen)
   document.getElementById('appOpenGallery')?.addEventListener('click', ()=> openLightbox(1));
@@ -2632,6 +2644,8 @@ if (btnLinks) {
         document.querySelectorAll('.linksBtn').forEach(btn=>{
         btn.addEventListener('click', openLinksAppPage);
         });
+
+
 
     // ===== Hintergrund ermitteln (ohne fetch, server- & file-Modus tauglich) =====
     function tryLoadImageSequential(urls, onOk, onFail){
@@ -2845,29 +2859,29 @@ lbPrev.addEventListener('click', prevLightbox);
 lbClose.addEventListener('click', closeLightbox);
 
 // ESC & Pfeiltasten
-window.addEventListener('keydown', (e)=>{
-  if(lb.style.display === 'none') return;
-  if(e.key === 'Escape') closeLightbox();
-  else if(e.key === 'ArrowRight') nextLightbox();
-  else if(e.key === 'ArrowLeft') prevLightbox();
-});
+//window.addEventListener('keydown', (e)=>{
+  //if(lb.style.display === 'none') return;
+  //if(e.key === 'Escape') closeLightbox();
+  //else if(e.key === 'ArrowRight') nextLightbox();
+  //else if(e.key === 'ArrowLeft') prevLightbox();
+//});
 
 // Touch-Wischgesten
-let touchStartX = null;
-lb.addEventListener('touchstart', (e)=>{ touchStartX = e.touches[0].clientX; }, {passive:true});
-lb.addEventListener('touchend', (e)=>{
-  if(touchStartX == null) return;
-  const dx = e.changedTouches[0].clientX - touchStartX;
-  touchStartX = null;
-  const TH = 40;
-  if(dx < -TH) nextLightbox();
-  else if(dx > TH) prevLightbox();
-}, {passive:true});
+//let touchStartX = null;
+//lb.addEventListener('touchstart', (e)=>{ touchStartX = e.touches[0].clientX; }, {passive:true});
+//lb.addEventListener('touchend', (e)=>{
+  //if(touchStartX == null) return;
+  //const dx = e.changedTouches[0].clientX - touchStartX;
+  //touchStartX = null;
+  //const TH = 40;
+  //if(dx < -TH) nextLightbox();
+  //else if(dx > TH) prevLightbox();
+//}, {passive:true});
 
 // Klick auf Hintergrund schließt
-lb.addEventListener('click', (e)=>{
-  if(e.target === lb) closeLightbox();
-});
+//lb.addEventListener('click', (e)=>{
+  //if(e.target === lb) closeLightbox();
+//});
 
     // ===== Toolbar =====
     document.getElementById('toggleLabels').addEventListener('click', ()=>{
@@ -3264,6 +3278,56 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 
+// Button "Neu" Event: zeigt Änderungstextfeld an/aus
+document.getElementById("btnNeu").addEventListener("click", function() {
+  const log = document.getElementById("changeLog");
+  const logList = document.getElementById("changeLogList");
+  const header = document.getElementById("changeLogHeader");
+  
+  if (log.style.display === "none") {
+    // Änderung implementation
+    const changes = [
+      {
+        date: "25.09.2025",
+        title: "Startseite & Infopage",
+        items: [
+          "'Neu' Button hinzugefügt",
+          "Olat: Neue Materialien",
+          "Methodenkoffer: Enthält Bsp. für Advanced Organizer",
+          "Grundrisse des Gebäudes in Olat"
+        ]
+      },
+      {
+        date: "20.09.2025",
+        title: "Bugfix UI",
+        items: [
+          "Button-Interaktionen optimiert"
+        ]
+      }
+    ];
+
+    // Liste leeren
+    logList.innerHTML = "";
+
+    // Header mit Datum und Titel des neuesten Eintrags setzen
+    header.textContent = `${changes[0].date} - ${changes[0].title}`;
+
+    // Änderungsitems als Listeneinträge anfügen
+    changes[0].items.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      logList.appendChild(li);
+    });
+    
+    // Textfeld anzeigen
+    log.style.display = "block";
+  } else {
+    // Textfeld ausblenden
+    log.style.display = "none";
+  }
+});
+
+
 // === Tutorial (immer für Schüler, 2 Schritte) ===
 (function(){
   const overlay = document.getElementById('tutOverlay');
@@ -3384,9 +3448,10 @@ window.startStudentTutorial = function() {
   let steps = [
     welcomeStep,
     // ... hier müssen die weiteren einzelnen Schritte folgen, z.B. Video-Button, Info-Button usw.
-    { el: document.querySelector(".introBtn"), text: "Schau dir das Lernsituation Video an." },
-    { el: document.querySelector(".linksBtn"), text: "Unter dem i findest du wichtige Informationen und Weiterleitungen." },
-    { el: document.getElementById("homeTutBtn"), text: "Mit diesem Button startest du jederzeit dieses Tutorial neu." }
+    { el: document.querySelector(".introBtn"), text: "Schau dir das Video zur Lernsituation an." },
+    { el: document.querySelector(".linksBtn"), text: "Unter dem ℹ️ findest du wichtige Informationen und Weiterleitungen." },
+    { el: document.getElementById("btnNeu"),  text: "Aktuelle Änderungen der Seite können hier nachgelesen werden."},
+    { el: document.getElementById("homeTutBtn"), text: "Das ❓ startet jederzeit dieses Tutorial neu." }
   ];
 
   let stepIdx = 0;
@@ -3560,7 +3625,13 @@ window.startStudentTutorial = function() {
       { el: document.querySelector('#slideDesc .info-card')
             || document.querySelector('#slideDesc .info-content')
             || document.getElementById('slideDesc'),
-        text: 'Projektbeschreibung – hier stehen die wichtigsten Inhalte zum Bereich.' }
+        text: 'Projektbeschreibung – hier stehen die wichtigsten Inhalte zum Bereich.' },
+
+        // Fokus auf den ROTEINFONEU Infobereich / Projektbeschreibung
+      { el: document.querySelector('#slideDesc .red-info-card')
+            || document.querySelector('#slideDesc .info-content')
+            || document.getElementById('slideDesc'),
+        text: 'Aktuelle Arbeitsaufträge – hier stehen die aktuellen To Do`s.' }
     ].filter(s => !!s.el);
 
     if (stepDefs.length === 0) return;
@@ -3672,9 +3743,68 @@ window.startStudentTutorial = function() {
   };
 })();
 
+window.addEventListener("DOMContentLoaded", function() {
+  const neuButton = document.getElementById("btnNeu");
+  const changeLog = document.getElementById("changeLog");
+  const changeLogList = document.getElementById("changeLogList");
+  const changeLogHeader = document.getElementById("changeLogHeader");
+
+  if (!neuButton || !changeLog || !changeLogList || !changeLogHeader) {
+    console.error("Eines der Elemente für 'Neu' Button nicht gefunden.");
+    return;
+  }
+
+  neuButton.addEventListener("click", function() {
+    console.log("Neu Button geklickt");
+    if (changeLog.style.display === "none" || changeLog.style.display === "") {
+      // Beispiel-Daten
+      const changes = [
+        {
+          date: "25.09.2025",
+          title: "Startseite aktualisiert",
+          items: [
+            " 'Neu' Button hinzugefügt",
+            "NEU - Material auf Olat",
+            "Methodenkoffer - Beispiele für Advanced Organizer",
+            "Gebäude Grundrisse",
+            "Bugfix Swipe in Zoom deaktiviert"
+          ]
+          
+        }
+      ];
+      // Header setzen
+      changeLogHeader.textContent = `${changes[0].date} - ${changes[0].title}`;
+      // Liste füllen
+      changeLogList.innerHTML = "";
+      changes[0].items.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        changeLogList.appendChild(li);
+      });
+      changeLog.style.display = "block";
+    } else {
+      changeLog.style.display = "none";
+    }
+  });
+});
 
   </script>
-  
+<script> 
+document.getElementById("btnNeu").addEventListener("click", function() {
+  var changeLog = document.getElementById("changeLog");
+  var changeLogList = document.getElementById("changeLogList");
+  var changeLogHeader = document.getElementById("changeLogHeader");
+//Änderungen hier eintragen
+  if (changeLog.style.display === "none" || changeLog.style.display === "") {
+    changeLogHeader.textContent = "25.09.2025 - Startseite aktualisiert";
+    changeLogList.innerHTML = "<li>'Neu' Button hinzugefügt</li><li>Neues Material auf OLAT</li><li>Methodenkoffer: Beispiele für Advanced Org.</li><li>Gebäude Grundrisse</li>";
+    changeLog.style.display = "block";
+  } else {
+    changeLog.style.display = "none";
+  }
+});
+</script> 
+
 
 </body>
 </html>
