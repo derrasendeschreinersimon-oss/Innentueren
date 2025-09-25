@@ -1097,6 +1097,115 @@ max-height: none !important;
 
 
   </style>
+
+<!-- === Call UI Styles (BEGIN) === -->
+<style id="call-ui-styles">
+  .call-fab{
+    position:fixed;
+    right:16px; bottom:16px;
+    width:56px; height:56px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:#10b981; /* teal/green */
+    box-shadow:0 8px 24px rgba(0,0,0,.2);
+    cursor:pointer;
+    z-index:9999;
+    transition:transform .15s ease, box-shadow .15s ease, background .2s ease;
+    user-select:none;
+  }
+  .call-fab:hover{ transform:translateY(-2px); box-shadow:0 12px 28px rgba(0,0,0,.25); }
+  .call-fab:active{ transform:translateY(0); }
+  .call-fab svg{ width:26px; height:26px; fill:white; }
+
+  .call-modal{
+    position:fixed; inset:0; display:none;
+    align-items:center; justify-content:center;
+    background:rgba(0,0,0,.6);
+    z-index:10000;
+    touch-action:none;
+  }
+  .call-modal[aria-hidden="false"]{ display:flex; }
+  .call-card{
+    width:min(92vw, 360px);
+    border-radius:24px;
+    background:linear-gradient(160deg, #0f172a, #1f2937);
+    color:white;
+    box-shadow:0 16px 48px rgba(0,0,0,.35);
+    overflow:hidden;
+    position:relative;
+  }
+  .call-card .status-bar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 14px; font-size:12px; opacity:.85;
+  }
+  .call-card .close-x{
+    position:absolute; top:10px; right:10px; width:36px; height:36px;
+    display:grid; place-items:center; border-radius:50%;
+    background:rgba(255,255,255,.08); backdrop-filter: blur(6px);
+    cursor:pointer; transition:background .2s ease;
+  }
+  .call-card .close-x:hover{ background:rgba(255,255,255,.14); }
+  .call-card .ring-area{
+    padding:28px 20px 8px; text-align:center;
+  }
+.call-card .caller-avatar img{
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  object-fit:cover;
+  display:block;
+}
+.call-card .pulse{ z-index:2; } /* Pulsring bleibt oben */
+
+  .call-card .pulse{
+    position:absolute; inset:-8px;
+    border-radius:50%;
+    border:2px solid rgba(16,185,129,.6);
+    animation:pulse 1.6s ease-out infinite;
+    pointer-events:none;
+  }
+  @keyframes pulse{
+    0%{ transform:scale(.9); opacity:.9; }
+    70%{ transform:scale(1.25); opacity:0; }
+    100%{ transform:scale(1.25); opacity:0; }
+  }
+  .call-card .label-top{ font-size:13px; letter-spacing:.08em; opacity:.7; }
+  .call-card .caller-name{ font-size:22px; font-weight:700; margin-top:4px; }
+  .call-card .timer{ font-variant-numeric:tabular-nums; opacity:.75; margin-top:4px; display:none; }
+  .call-card.playing .timer{ display:block; }
+
+  .call-card .controls{
+    display:flex; gap:14px; padding:18px; justify-content:center; margin-top:6px;
+  }
+  .call-btn{
+    min-width:110px;
+    padding:12px 14px;
+    border-radius:999px; border:none; cursor:pointer;
+    font-weight:600; color:white; background:#374151;
+    transition:transform .1s ease, background .2s ease, box-shadow .2s ease;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);
+  }
+  .call-btn:active{ transform:translateY(1px); }
+  .call-btn.primary{ background:#10b981; }
+  .call-btn.danger{ background:#ef4444; }
+  .call-btn.secondary{ background:#4b5563; }
+
+  .call-media{ display:none; }
+  .call-card.playing .call-media{ display:block; }
+  .call-help{ text-align:center; font-size:12px; opacity:.7; padding:6px 0 16px; }
+
+  /* Prevent modal from closing by background clicks; pointer-events only on card and its children */
+  .call-modal > *{ pointer-events:auto; }
+</style>
+<!-- === Call UI Styles (END) === -->
+
+<style>
+
+/* === Admin Toggle: Call FAB visibility === */
+.call-fab{ display:none !important; }
+html[data-call-enabled="1"] .call-fab{ display:flex !important; }
+
+</style>
 </head>
 <body>
   <div class="app card" role="application" aria-label="Interaktive Bild-Hotspots Lernspiel">
@@ -1180,7 +1289,12 @@ max-height: none !important;
         <button id="undoPoint" type="button">Punkt zurück</button>
         <button id="savePoly" type="button" disabled>Fertig (speichern)</button>
         <button id="cancelMeasure" type="button">Abbrechen</button>
-      </div>
+      
+      <label class="admin-only inline" id="callToggleWrap" style="display:inline-flex;gap:.5rem;align-items:center">
+        <input type="checkbox" id="callEnabledToggle" />
+        Anrufschaltfläche anzeigen
+      </label>
+</div>
 
       <select id="hotspotSelect" class="admin-only inline">
         <option value="">Bereich wählen…</option>
@@ -1714,7 +1828,7 @@ if (window.visualViewport){
     let addingPoint = false;
 
     // Admin-Status (Session) & PIN
-    const ADMIN_PIN = 'test';
+    const ADMIN_PIN = 'pinkmiciclub25';
     let isAdmin = sessionStorage.getItem('is_admin') === 'true';
 
     // Globale Zoom-Kennzahl (über Slider änderbar)
@@ -2594,26 +2708,26 @@ if (btnLinks) {
             <!-- Beispiel-Link 1 -->
             <div class="app-row">
               <button class="tool-btn app-tile" type="button" title="Architektur Vorlagen"
-                onclick="window.open('https://example.com/architektur', '_blank')">
-                <span class="tool-icon">📐</span>
+                onclick="window.open('https://www.haefele.de/prod-live/web/WFS/Haefele-HDE-Site/de_DE/-/EUR/Static-View/pdfcatalog/de_DE/catalogs/index.php?catalog=DGH_Design2021&startpage=0.1', '_blank')">
+                <span class="tool-icon">🔩</span>
                 <span class="label" style="display:none">Architektur</span>
               </button>
               <div class="app-desc">
-                <span class="title">Architektur-Vorlagen</span>
-                <span>Externe Seite mit Entwürfen und Zeichnungen.</span>
+                <span class="title"><strong>Häfele</strong></span>
+                <span>Gesamtkatalog Fa. Häfele Beschläge und mehr</span>
               </div>
             </div>
 
             <!-- Beispiel-Link 2 -->
             <div class="app-row">
               <button class="tool-btn app-tile" type="button" title="Baustoffe"
-                onclick="window.open('https://example.com/baustoffe', '_blank')">
-                <span class="tool-icon">🏗️</span>
+                onclick="window.open('https://de.simonswerk.com/de/architektur/einsatzbereiche/wohnraumtueren', '_blank')">
+                <span class="tool-icon">🚪</span>
                 <span class="label" style="display:none">Baustoffe</span>
               </button>
               <div class="app-desc">
-                <span class="title">Baustoffe</span>
-                <span>Hilfreiche Website zu Materialien.</span>
+                <span class="title"><strong>Simonswerk</strong></span>
+                <span>Türen, Beschläge und Objektlösungen</span>
               </div>
             </div>
 
@@ -2859,29 +2973,29 @@ lbPrev.addEventListener('click', prevLightbox);
 lbClose.addEventListener('click', closeLightbox);
 
 // ESC & Pfeiltasten
-//window.addEventListener('keydown', (e)=>{
-  //if(lb.style.display === 'none') return;
-  //if(e.key === 'Escape') closeLightbox();
-  //else if(e.key === 'ArrowRight') nextLightbox();
-  //else if(e.key === 'ArrowLeft') prevLightbox();
-//});
+window.addEventListener('keydown', (e)=>{
+  if(lb.style.display === 'none') return;
+  if(e.key === 'Escape') closeLightbox();
+  else if(e.key === 'ArrowRight') nextLightbox();
+  else if(e.key === 'ArrowLeft') prevLightbox();
+});
 
 // Touch-Wischgesten
-//let touchStartX = null;
-//lb.addEventListener('touchstart', (e)=>{ touchStartX = e.touches[0].clientX; }, {passive:true});
-//lb.addEventListener('touchend', (e)=>{
-  //if(touchStartX == null) return;
-  //const dx = e.changedTouches[0].clientX - touchStartX;
-  //touchStartX = null;
-  //const TH = 40;
-  //if(dx < -TH) nextLightbox();
-  //else if(dx > TH) prevLightbox();
-//}, {passive:true});
+let touchStartX = null;
+lb.addEventListener('touchstart', (e)=>{ touchStartX = e.touches[0].clientX; }, {passive:true});
+lb.addEventListener('touchend', (e)=>{
+  if(touchStartX == null) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  touchStartX = null;
+  const TH = 40;
+  if(dx < -TH) nextLightbox();
+  else if(dx > TH) prevLightbox();
+}, {passive:true});
 
 // Klick auf Hintergrund schließt
-//lb.addEventListener('click', (e)=>{
-  //if(e.target === lb) closeLightbox();
-//});
+lb.addEventListener('click', (e)=>{
+  if(e.target === lb) closeLightbox();
+});
 
     // ===== Toolbar =====
     document.getElementById('toggleLabels').addEventListener('click', ()=>{
@@ -3764,10 +3878,11 @@ window.addEventListener("DOMContentLoaded", function() {
           title: "Startseite aktualisiert",
           items: [
             " 'Neu' Button hinzugefügt",
+            "Hilfreiche Websites hinzugefügt",
             "NEU - Material auf Olat",
             "Methodenkoffer - Beispiele für Advanced Organizer",
             "Gebäude Grundrisse",
-            "Bugfix Swipe in Zoom deaktiviert"
+            "<strong>Bugfix:</strong> Swipe in Zoom deaktiviert"
           ]
           
         }
@@ -3806,5 +3921,193 @@ document.getElementById("btnNeu").addEventListener("click", function() {
 </script> 
 
 
+
+<!-- === Call UI Markup (BEGIN) === -->
+<button class="call-fab" id="callFab" aria-label="Anruf starten">
+  <!-- phone handset icon (inline SVG) -->
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M6.62 10.79a15.91 15.91 0 006.59 6.59l2.2-2.2a1 1 0 011.05-.24c1.15.38 2.39.59 3.54.59a1 1 0 011 1v3.5a1 1 0 01-1 1C11.85 20.04 3.96 12.15 3.96 2.99a1 1 0 011-1h3.5a1 1 0 011 1c0 1.15.2 2.39.59 3.54a1 1 0 01-.24 1.05l-2.2 2.2z"/>
+  </svg>
+</button>
+
+<div class="call-modal" id="callModal" aria-hidden="true" role="dialog" aria-label="Eingehender Anruf">
+  <div class="call-card" role="document">
+    <div class="status-bar">
+      <span>10:05</span>
+      <span>LTE</span>
+    </div>
+    <div class="close-x" id="callClose" aria-label="Schließen" title="Schließen">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M6 6l12 12M18 6L6 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <!-- Ringtone audio (plays on modal open) -->
+    <audio id="ringAudio" preload="auto" loop>
+      <source id="ringAudioSource" src="media/ring.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="ring-area">
+      <div class="caller-avatar">
+    <span class="pulse"></span>
+    <img id="callerAvatarImg" src="media/horst.png" alt="Horst Müller">
+    </div>
+
+      <div class="label-top">Eingehender Anruf</div>
+      <div class="caller-name" id="callerName">Horst Müller</div>
+      <div class="timer" id="callTimer">00:00</div>
+    </div>
+
+    <div class="controls">
+      <button class="call-btn primary" id="callAnswer">Annehmen</button>
+      <button class="call-btn danger" id="callDecline">Ablehnen</button>
+    </div>
+
+    <div class="call-media">
+      <!-- AUDIO: Setze deine Datei in data-audio-src oder im <source>. -->
+      <audio id="callAudio" preload="auto">
+        <source id="callAudioSource" src="media/voice.wav" type="audio/mpeg">
+        Dein Browser unterstützt keine Audio-Wiedergabe.
+      </audio>
+      <!-- Optional: Video-Unterstützung
+      <video id="callVideo" playsinline></video>
+      -->
+      <div class="call-help"></div>
+    </div>
+  </div>
+</div>
+<!-- === Call UI Markup (END) === -->
+
+<!-- === Call UI Script (BEGIN) === -->
+<script>
+(function(){
+  const fab = document.getElementById('callFab');
+  const modal = document.getElementById('callModal');
+  const closeX = document.getElementById('callClose');
+  const decline = document.getElementById('callDecline');
+  const answer = document.getElementById('callAnswer');
+  const card = modal.querySelector('.call-card');
+  const audio = document.getElementById('callAudio');
+  const audioSource = document.getElementById('callAudioSource');
+  const ring = document.getElementById('ringAudio');
+  const ringSource = document.getElementById('ringAudioSource');
+  const timerEl = document.getElementById('callTimer');
+
+  let timerInt = null;
+  let startTs = 0;
+
+  function fmt(ms){
+    const s = Math.floor(ms/1000);
+    const mm = String(Math.floor(s/60)).padStart(2,'0');
+    const ss = String(s%60).padStart(2,'0');
+    return `${mm}:${ss}`;
+  }
+
+ function openModal(){
+  modal.setAttribute('aria-hidden','false');
+  // lock scroll
+  document.documentElement.style.overflow = 'hidden';
+  ringStart(); // << Klingeln starten
+  }
+
+
+function closeModal(){
+  // stop audio & timer
+  stopPlayback();
+  ringStop(); // << Klingeln stoppen
+  modal.setAttribute('aria-hidden','true');
+  card.classList.remove('playing');
+  document.documentElement.style.overflow = '';
+  }
+
+    //RINGTONE    
+  function ringStart(){
+  try { ring.currentTime = 0; ring.play().catch(()=>{}); } catch(e){}
+    }
+    function ringStop(){
+      try { ring.pause(); ring.currentTime = 0; } catch(e){}
+    }
+
+
+  function startPlayback(){
+    // Attempt to play audio only after user gesture
+    ringStop(); // << Klingeln stoppen, bevor die Sprachnachricht startet
+    startTs = Date.now();
+    timerEl.textContent = '00:00';
+    card.classList.add('playing');
+    clearInterval(timerInt);
+    timerInt = setInterval(()=>{
+      timerEl.textContent = fmt(Date.now() - startTs);
+    }, 250);
+    audio.currentTime = 0;
+    audio.play().catch(err => {
+      console.warn('Audio play prevented:', err);
+    });
+  }
+
+  function stopPlayback(){
+    clearInterval(timerInt);
+    timerInt = null;
+    try { audio.pause(); } catch(e){}
+    audio.currentTime = 0;
+  }
+
+  // Prevent closing by clicking outside the card
+  modal.addEventListener('click', (e)=>{
+    // Do nothing on backdrop clicks
+    if(e.target === modal){ e.stopPropagation(); }
+  });
+
+  // Open from FAB
+  fab.addEventListener('click', openModal);
+
+  // Close only via X or Decline
+  closeX.addEventListener('click', closeModal);
+  decline.addEventListener('click', closeModal);
+
+  // Start playback on Answer
+  answer.addEventListener('click', startPlayback);
+
+  // Optional: allow Escape to close? Intentionally disabled for strict behavior
+  // window.addEventListener('keydown', e => { if(e.key==='Escape' && modal.getAttribute('aria-hidden')==='false') closeModal(); });
+
+  // Public API via dataset (optional): set audio src dynamically
+  // Example: <button id="callFab" data-audio-src="media/deine-datei.mp3">
+  const dsAudio = fab?.dataset?.audioSrc;
+  if(dsAudio){ audioSource.setAttribute('src', dsAudio); audio.load(); }
+
+
+
+})();
+</script>
+<!-- === Call UI Script (END) === -->
+
+<script>
+(function(){
+  const html = document.documentElement;
+  const toggle = document.getElementById('callEnabledToggle');
+
+  function applyCallEnabled(){
+    const enabled = localStorage.getItem('callEnabled') === '1';
+    html.setAttribute('data-call-enabled', enabled ? '1' : '0');
+    if(toggle) toggle.checked = enabled;
+  }
+  function setCallEnabled(v){
+    localStorage.setItem('callEnabled', v ? '1' : '0');
+    applyCallEnabled();
+  }
+
+  // Init + bind
+  applyCallEnabled();
+  if(toggle){
+    toggle.addEventListener('change', (e)=> setCallEnabled(e.target.checked));
+  }
+
+  // Cross-tab sync
+  window.addEventListener('storage', (e)=>{
+    if(e.key === 'callEnabled') applyCallEnabled();
+  });
+})();
+</script>
 </body>
 </html>
