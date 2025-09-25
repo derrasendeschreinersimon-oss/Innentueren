@@ -108,6 +108,8 @@
   display: grid;
   grid-template-areas: "prev img next" "meta meta meta";
   align-items: center; justify-items: center;
+  touch-action: none;
+  overscroll-behavior: contain;
 }
 .lb-img{
   grid-area: img;
@@ -2973,29 +2975,29 @@ lbPrev.addEventListener('click', prevLightbox);
 lbClose.addEventListener('click', closeLightbox);
 
 // ESC & Pfeiltasten
-window.addEventListener('keydown', (e)=>{
-  if(lb.style.display === 'none') return;
-  if(e.key === 'Escape') closeLightbox();
-  else if(e.key === 'ArrowRight') nextLightbox();
-  else if(e.key === 'ArrowLeft') prevLightbox();
-});
+//window.addEventListener('keydown', (e)=>{
+ // if(lb.style.display === 'none') return;
+  //if(e.key === 'Escape') closeLightbox();
+  //else if(e.key === 'ArrowRight') nextLightbox();
+  //else if(e.key === 'ArrowLeft') prevLightbox();
+//});
 
 // Touch-Wischgesten
-let touchStartX = null;
-lb.addEventListener('touchstart', (e)=>{ touchStartX = e.touches[0].clientX; }, {passive:true});
-lb.addEventListener('touchend', (e)=>{
-  if(touchStartX == null) return;
-  const dx = e.changedTouches[0].clientX - touchStartX;
-  touchStartX = null;
-  const TH = 40;
-  if(dx < -TH) nextLightbox();
-  else if(dx > TH) prevLightbox();
-}, {passive:true});
+//let touchStartX = null;
+//lb.addEventListener('touchstart', (e)=>{ touchStartX = e.touches[0].clientX; }, {passive:true});
+//lb.addEventListener('touchend', (e)=>{
+  //if(touchStartX == null) return;
+  //const dx = e.changedTouches[0].clientX - touchStartX;
+  //touchStartX = null;
+  //const TH = 40;
+  //if(dx < -TH) nextLightbox();
+  //else if(dx > TH) prevLightbox();
+//}, {passive:true});
 
 // Klick auf Hintergrund schließt
-lb.addEventListener('click', (e)=>{
-  if(e.target === lb) closeLightbox();
-});
+//lb.addEventListener('click', (e)=>{
+  //if(e.target === lb) closeLightbox();
+//});
 
     // ===== Toolbar =====
     document.getElementById('toggleLabels').addEventListener('click', ()=>{
